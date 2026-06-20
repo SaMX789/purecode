@@ -1,47 +1,63 @@
-import { useState } from 'react';
+// src/App.jsx
+import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import './App.css'; // Asegúrate de tener este archivo para darle estilo
-
+import Splash from './components/Splash'; // <-- Importamos tu pantalla de carga
+import './App.css'; // Estilos
 
 function App() {
-  // Estos "estados" guardan lo que el usuario escribe en los inputs
+  // 1. Estado para controlar la pantalla de carga (arranca en true)
+  const [cargando, setCargando] = useState(true);
+
+  // 2. Estados para guardar lo que el usuario escribe y la UI
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  
-  // Este estado controla si la contraseña se ve o está oculta
   const [mostrarPassword, setMostrarPassword] = useState(false);
   
-  const [error, setError] = useState(''); // <-- Nuevo estado para manejar errores
+  const [error, setError] = useState(''); // <-- Estado para manejar errores de login
   const navigate = useNavigate(); // <-- Inicializamos el hook de navegación
-  
-  // Función que se ejecuta al presionar "Iniciar sesión"
+
+  // 3. Temporizador de 3 segundos para apagar el Splash Screen
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setCargando(false);
+    }, 3000);
+
+    return () => clearTimeout(timer); // Limpieza del timer al desmontar
+  }, []);
+
+  // 4. Función que se ejecuta al presionar "Iniciar sesión"
   const manejarEnvio = (e) => {
     e.preventDefault(); // Evita que la página se recargue
     
-    // 1. Creamos nuestros datos de prueba (Mock Data)
+    // Creamos nuestros datos de prueba (Mock Data)
     const credencialesSimuladas = {
       email: 'magdiel@purecode.com',
       password: 'admin'
     };
 
-    // 2. Validamos las credenciales ingresadas contra las simuladas
+    // Validamos las credenciales ingresadas contra las simuladas
     if (email === credencialesSimuladas.email && password === credencialesSimuladas.password) {
-      // Si las credenciales son correctas, redirigimos al dashboard
+      // Si las credenciales son correctas
       setError(''); // Limpiamos errores
       console.log('Inicio de sesión exitoso. Redirigiendo...');
-      navigate('/dashboard');
+      navigate('/dashboard'); // Redirigimos al dashboard
     } else  {
-      // Si el usuario ha ingresado algo pero no coincide, mostramos un error
+      // Si no coinciden, mostramos un error
       setError('Credenciales incorrectas. Por favor, inténtalo de nuevo.');
     }
   };
-  
+
+  // 5. Condición inicial: Si está cargando, mostramos la gotita y detenemos el renderizado del resto
+  if (cargando) {
+    return <Splash />;
+  }
+
+  // 6. Si ya pasaron los 3 segundos, se muestra el Login con su lógica
   return (
     <div className="contenedor-principal">
       
       {/* Encabezado (Logo y Título de la app) */}
       <header className="encabezado-marca">
-        {/* Sustituye la URL por la ruta real de tu logo de la gotita */}
         <img src="/icono.png" alt="Logo PureCode" className="logo" />
         <h1 className="titulo-marca">PureCode</h1>
       </header>
@@ -87,11 +103,13 @@ function App() {
                 className="boton-ojito"
                 onClick={() => setMostrarPassword(!mostrarPassword)}
               >
-                {/* Puedes cambiar esto por un ícono SVG o de una librería */}
                 {mostrarPassword ? "🙈" : "👁️"}
               </button>
             </div>
           </div>
+
+          {/* Mensaje de error visible en pantalla */}
+          {error && <p className="mensaje-error" style={{color: 'red', fontSize: '14px'}}>{error}</p>}
 
           {/* Botón de Enviar */}
           <button type="submit" className="boton-enviar">
