@@ -5,11 +5,13 @@
   justify-content: center;
   align-items: center;
   height: 100vh;
-  width: 100vw;
-  background-color: #f0f4f8; /* Color de fondo suave */
+  width: 100%; /* Cambiado de 100vw a 100% */
+  background-color: #f0f4f8; 
   font-family: sans-serif;
+  box-sizing: border-box; /* Asegura que el padding/border no rompa el diseño */
 }
 
+/* El resto de tu CSS se queda exactamente igual */
 .gota-wrapper {
   position: relative;
   width: 150px;
@@ -17,26 +19,24 @@
   margin-bottom: 20px;
 }
 
-/* Truco CSS: Girar 45 grados un cuadrado con esquinas redondeadas para hacer una gota */
 .gota {
   position: relative;
   width: 100%;
   height: 100%;
-  background-color: #e0e6ed; /* Color de la gota vacía */
-  border: 4px solid #0077b6; /* Borde azul */
+  background-color: #e0e6ed; 
+  border: 4px solid #0077b6; 
   border-radius: 0% 100% 100% 100%;
   transform: rotate(45deg);
-  overflow: hidden; /* Corta el agua para que no se salga de la gota */
+  overflow: hidden; 
   box-shadow: 0 10px 20px rgba(0,0,0,0.1);
 }
 
-/* El agua que se rellena desde abajo hacia arriba */
 .agua {
   position: absolute;
   bottom: 0;
   left: 0;
   width: 100%;
-  background: linear-gradient(0deg, #0077b6 0%, #00b4d8 100%); /* Degradado de agua */
+  background: linear-gradient(0deg, #0077b6 0%, #00b4d8 100%); 
   transition: height 0.1s linear;
 }
 
@@ -49,4 +49,13 @@
 @keyframes parpadeo {
   0%, 100% { opacity: 0.6; }
   50% { opacity: 1; }
+}
+
+/* Agrega esto en tu index.css o archivo global principal */
+html, body {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  height: 100%;
+  overflow-x: hidden; /* Evita cualquier desbordamiento horizontal inesperado */
 }
