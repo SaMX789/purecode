@@ -39,7 +39,7 @@ function Registro() {
       <div className="registro-contenedor">
         <main className="registro-tarjeta">
           <h2 className="registro-bienvenida">Crea tu cuenta</h2>
-          <p className="registro-subtitulo">Ingresa tus datos profesionales para comenzar a monitorear.</p>
+          <p className="registro-subtitulo">Ingresa tus datos para comenzar a monitorear.</p>
 
           <form onSubmit={manejarRegistro}>
             
@@ -49,7 +49,7 @@ function Registro() {
               <input
                 type="text"
                 id="nombre"
-                placeholder="Ej. Magdiel"
+                placeholder="Ingresa tu nombre completo"
                 value={nombre}
                 onChange={(e) => setNombre(e.target.value)}
                 required
@@ -62,7 +62,7 @@ function Registro() {
               <input
                 type="email"
                 id="email"
-                placeholder="magdiel@purecode.eco"
+                placeholder="ejemplo@gmail.com"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
