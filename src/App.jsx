@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import Splash from './components/Splash'; // <-- Importamos tu pantalla de carga
 import './App.css'; // Estilos
+import { iniciarSesion } from './Registrar.js'; // <-- Ajusta la ruta si es diferente
 
 function App() {
   // 1. Estado para controlar la pantalla de carga (arranca en true)
@@ -14,6 +15,9 @@ function App() {
   const [mostrarPassword, setMostrarPassword] = useState(false);
   
   const [error, setError] = useState(''); // <-- Estado para manejar errores de login
+
+  const [procesandoLogin, setProcesandoLogin] = useState(false);
+
   const navigate = useNavigate(); // <-- Inicializamos el hook de navegación
 
   // 3. Temporizador de 3 segundos para apagar el Splash Screen
@@ -26,25 +30,33 @@ function App() {
   }, []);
 
   // 4. Función que se ejecuta al presionar "Iniciar sesión"
-  const manejarEnvio = (e) => {
-    e.preventDefault(); // Evita que la página se recargue
-    
-    // Creamos nuestros datos de prueba (Mock Data)
-    const credencialesSimuladas = {
-      email: 'magdiel@purecode.com',
-      password: 'admin'
-    };
+  const manejarEnvio = async (e) => {
+    e.preventDefault();
 
-    // Validamos las credenciales ingresadas contra las simuladas
-    if (email === credencialesSimuladas.email && password === credencialesSimuladas.password) {
-      // Si las credenciales son correctas
-      setError(''); // Limpiamos errores
+    setProcesandoLogin(true); // Mostramos "Cargando..." en el botón
+    setError(''); // Limpiamos errores previos
+
+    // NUEVO: Llamamos a Firebase para verificar al usuario
+    const resultado = await iniciarSesion(email, password);
+
+    if (resultado.exito) {
       console.log('Inicio de sesión exitoso. Redirigiendo...');
-      navigate('/dashboard'); // Redirigimos al dashboard
-    } else  {
-      // Si no coinciden, mostramos un error
-      setError('Credenciales incorrectas. Por favor, inténtalo de nuevo.');
+      navigate('/dashboard'); 
+    } else {
+      // CAMBIO: Personalizamos el error dependiendo de qué falló en Firebase
+      if (resultado.error === 'auth/invalid-credential') {
+        setError('Correo o contraseña incorrectos.');
+      } else if (resultado.error === 'auth/user-not-found') {
+         setError('No existe una cuenta con este correo.');
+      } else if (resultado.error === 'auth/too-many-requests') {
+         setError('Cuenta temporalmente bloqueada por muchos intentos fallidos.');
+      } else {
+        setError('Ocurrió un error al intentar iniciar sesión. Inténtalo de nuevo.');
+      }
     }
+    
+    setProcesandoLogin(false);
+
   };
 
   // 5. Condición inicial: Si está cargando, mostramos la gotita y detenemos el renderizado del resto

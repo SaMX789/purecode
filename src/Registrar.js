@@ -1,6 +1,6 @@
 import { db, auth } from "./FireBase.js"; 
 import { doc, setDoc } from "firebase/firestore";
-import { createUserWithEmailAndPassword } from "firebase/auth";
+import { createUserWithEmailAndPassword, signInWithEmailAndPassword } from "firebase/auth";
 
 
 // EXPORTAMOS la función para poder llamarla desde otro archivo
@@ -24,5 +24,21 @@ export async function registrarUsuario(nombre, email, contrasenia) {
   } catch (error) {
     console.error("Error al registrar en la base de datos: ", error);
     return false;
+  }
+}
+
+export async function iniciarSesion(email, contrasenia) {
+  try {
+    // Intentamos iniciar sesión en Firebase
+    const userCredential = await signInWithEmailAndPassword(auth, email, contrasenia);
+    const usuario = userCredential.user;
+    
+    console.log("¡Inicio de sesión exitoso!", usuario.email);
+    return { exito: true, usuario: usuario }; // Retornamos éxito y los datos del usuario
+    
+  } catch (error) {
+    // Si la contraseña es incorrecta o el usuario no existe, caerá aquí
+    console.error("Error al iniciar sesión: ", error.code);
+    return { exito: false, error: error.code }; // Retornamos fallo y el código de error
   }
 }
