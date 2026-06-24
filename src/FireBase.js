@@ -1,5 +1,6 @@
 import { initializeApp } from "firebase/app";
 import { getFirestore } from "firebase/firestore";
+import { getAuth } from "firebase/auth";
 
 
 
@@ -17,6 +18,7 @@ const app = initializeApp(firebaseConfig);
 
 // 3. Inicializamos Firestore conectándolo a nuestra app
 const db = getFirestore(app);
+export const auth = getAuth(app);
 
 // 4. Exportamos 'db' para poder usar la base de datos en tus componentes o vistas
 export { app, db };

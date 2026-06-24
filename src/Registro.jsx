@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import './Registro.css'; // Importación del CSS exclusivo del módulo
-import { Link } from 'react-router-dom';
+import { Link, useNavigate} from 'react-router-dom';
+import { registrarUsuario } from './Registrar.js';
 
 function Registro() {
   const [nombre, setNombre] = useState('');
@@ -11,13 +12,23 @@ function Registro() {
   const [mostrarPassword, setMostrarPassword] = useState(false);
   const [mostrarConfirmarPassword, setMostrarConfirmarPassword] = useState(false);
 
-  const manejarRegistro = (e) => {
+  const navigate = useNavigate();
+
+  const manejarRegistro =async (e) => {
     e.preventDefault();
     if (password !== confirmarPassword) {
       alert("Las contraseñas no coinciden");
       return;
     }
-    console.log('Datos de registro:', { nombre, email, password });
+    const exito = await registrarUsuario(nombre, email, password);
+
+    if(exito){
+      alert("Registro Exitoso");
+      navigate("/");
+    }
+    else{
+      alert ("Error no se pudo realizar el registro");
+    }
   };
 
   return (
