@@ -1,0 +1,312 @@
+/* =========================================
+   LAYOUT GLOBAL
+========================================= */
+.perfil-layout {
+  min-height: 100vh;
+  background-color: #f7f9fc;
+  display: flex;
+  flex-direction: column;
+  padding-bottom: 80px;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+}
+
+/* =========================================
+   CABECERA
+========================================= */
+.perfil-header {
+  background-color: #ffffff;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 20px;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.perfil-logo-group {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.perfil-logo-group .logo-icon { width: 24px; height: 24px; }
+.perfil-logo-group h2 { font-size: 20px; color: #004b7c; font-weight: 700; margin: 0; }
+
+.btn-cerrar-sesion {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: none;
+  border: none;
+  color: #64748b;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: color 0.2s;
+}
+
+.btn-cerrar-sesion:hover { color: #dc2626; }
+.btn-cerrar-sesion svg { width: 18px; height: 18px; }
+
+/* =========================================
+   CONTENIDO PRINCIPAL
+========================================= */
+.perfil-content {
+  padding: 32px 20px 24px 20px;
+  max-width: 600px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+/* =========================================
+   IDENTIDAD DEL USUARIO (AVATAR)
+========================================= */
+.usuario-identidad {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 32px;
+}
+
+.avatar-contenedor {
+  position: relative;
+  margin-bottom: 16px;
+}
+
+.avatar-circulo {
+  width: 90px;
+  height: 90px;
+  background-color: #0f172a;
+  color: #ffffff;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 36px;
+  font-weight: 700;
+  box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+}
+
+.btn-editar-avatar {
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  background-color: #0073cc;
+  color: white;
+  border: 2px solid #ffffff;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.btn-editar-avatar svg { width: 14px; height: 14px; }
+
+.usuario-nombre {
+  font-size: 24px;
+  color: #0f172a;
+  margin: 0 0 4px 0;
+  font-weight: 700;
+}
+
+.usuario-email {
+  font-size: 15px;
+  color: #64748b;
+  margin: 0;
+}
+
+/* =========================================
+   TARJETAS DE CONFIGURACIÓN
+========================================= */
+.tarjeta-configuracion {
+  background-color: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  margin-bottom: 24px;
+  overflow: hidden;
+}
+
+.tarjeta-cabecera-gris {
+  background-color: #f8fafc;
+  padding: 12px 20px;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.tarjeta-cabecera-gris span {
+  font-size: 11px;
+  font-weight: 700;
+  color: #475569;
+  letter-spacing: 0.8px;
+}
+
+.tarjeta-cuerpo {
+  padding: 24px 20px;
+}
+
+.titulo-interno {
+  font-size: 18px;
+  color: #0f172a;
+  margin: 0 0 20px 0;
+  font-weight: 700;
+}
+
+/* =========================================
+   FORMULARIOS
+========================================= */
+.grupo-input-perfil {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 20px;
+}
+
+.grupo-input-perfil label {
+  font-size: 11px;
+  font-weight: 700;
+  color: #334155;
+  margin-bottom: 8px;
+  letter-spacing: 0.5px;
+}
+
+.grupo-input-perfil input {
+  width: 100%;
+  padding: 12px 14px;
+  background-color: #ffffff;
+  border: 1px solid #cbd5e0;
+  border-radius: 6px;
+  font-size: 15px;
+  color: #0f172a;
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.grupo-input-perfil input:focus { border-color: #0073cc; }
+
+/* Estado bloqueado */
+.grupo-input-perfil.bloqueado label { color: #94a3b8; }
+.grupo-input-perfil.bloqueado input {
+  background-color: #f8fafc;
+  color: #94a3b8;
+  border-color: #e2e8f0;
+  cursor: not-allowed;
+}
+
+/* BOTONES */
+.btn-guardar-cambios {
+  background-color: #005bb5;
+  color: white;
+  padding: 12px 20px;
+  border: none;
+  border-radius: 6px;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  float: right;
+}
+
+.btn-verificar {
+  background-color: #ffffff;
+  color: #005bb5;
+  border: 2px solid #005bb5;
+  padding: 10px 20px;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.btn-actualizar-bloqueado {
+  width: 100%;
+  background-color: #cbd5e0;
+  color: #ffffff;
+  padding: 12px;
+  border: none;
+  border-radius: 6px;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: not-allowed;
+  margin-top: 8px;
+}
+
+.linea-separadora {
+  border: none;
+  border-top: 1px solid #e2e8f0;
+  margin: 24px 0;
+}
+
+/* =========================================
+   ZONA DE RIESGO
+========================================= */
+.tarjeta-configuracion.zona-riesgo {
+  background-color: #fef2f2;
+  border: 1px solid #fecaca;
+}
+
+.riesgo-cuerpo {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px;
+  gap: 16px;
+}
+
+.riesgo-texto h3 {
+  font-size: 16px;
+  color: #b91c1c;
+  margin: 0 0 4px 0;
+  font-weight: 700;
+}
+
+.riesgo-texto p {
+  font-size: 13px;
+  color: #7f1d1d;
+  margin: 0;
+  line-height: 1.4;
+}
+
+.btn-eliminar-cuenta {
+  background: none;
+  border: none;
+  color: #dc2626;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+/* =========================================
+   BARRA DE NAVEGACIÓN INFERIOR (UNIFICADA)
+========================================= */
+.bottom-nav {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  background-color: #ffffff;
+  border-top: 1px solid #e2e8f0;
+  display: flex;
+  justify-content: space-around;
+  padding: 8px 0 calc(8px + env(safe-area-inset-bottom));
+  z-index: 1000;
+}
+
+.nav-item {
+  background: none;
+  border: none;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  color: #475569;
+  cursor: pointer;
+  padding: 8px 16px;
+  border-radius: 8px;
+  transition: all 0.2s;
+}
+
+.nav-item svg { width: 22px; height: 22px; }
+.nav-item span { font-size: 11px; font-weight: 600; }
+
+.nav-item.active { color: #0073cc; }
+.nav-item.active span { color: #0073cc; }
