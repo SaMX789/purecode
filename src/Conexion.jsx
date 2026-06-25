@@ -57,6 +57,19 @@ function Conexion() {
           </div>
         </section>
 
+        {/* Tarjeta 3: Calidad de Señal */}
+        <section className="tarjeta-senal">
+          <div className="senal-info">
+            <span className="etiqueta-blanca-transparente">CALIDAD DE SEÑAL</span>
+            <h3>Excelente (98%)</h3>
+          </div>
+          <div className="senal-icono">
+            <svg viewBox="0 0 100 100" preserveAspectRatio="none">
+              <polygon points="0,100 100,100 100,0" fill="white" />
+            </svg>
+          </div>
+        </section>
+
         {/* NUEVA TARJETA: Formulario de Configuración Wi-Fi */}
         <section className="tarjeta-datos tarjeta-config-red">
           <div className="tarjeta-cabecera">
@@ -98,18 +111,7 @@ function Conexion() {
           </form>
         </section>
 
-        {/* Tarjeta 3: Calidad de Señal */}
-        <section className="tarjeta-senal">
-          <div className="senal-info">
-            <span className="etiqueta-blanca-transparente">CALIDAD DE SEÑAL</span>
-            <h3>Excelente (98%)</h3>
-          </div>
-          <div className="senal-icono">
-            <svg viewBox="0 0 100 100" preserveAspectRatio="none">
-              <polygon points="0,100 100,100 100,0" fill="white" />
-            </svg>
-          </div>
-        </section>
+        
 
       </main>
 
