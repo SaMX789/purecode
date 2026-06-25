@@ -1,9 +1,37 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react'; // Agregamos el control de estados y efectos
 import { useNavigate } from 'react-router-dom';
+import { obtenerPh, obtenerTds } from './datosph'; // Con un solo punto (.)
 import './Dashboard.css';
 
 function Dashboard() {
   const navigate = useNavigate();
+
+  // =========================================================
+  // ESTADOS EN VIVO: Inician con los valores de tus compañeros
+  // =========================================================
+  const [ph, setPh] = useState(7.8);
+  const [tds, setTds] = useState(5);
+
+  // =========================================================
+  // EFECTO DE CONEXIÓN: Consulta a datosph.js cada 5 segundos
+  // =========================================================
+  useEffect(() => {
+    const actualizarLecturas = async () => {
+      const valorPh = await obtenerPh();  // Pregunta al archivo externo por el pH
+      const valorTds = await obtenerTds(); // Pregunta al archivo externo por el TDS
+      
+      setPh(valorPh);
+      setTds(valorTds);
+    };
+
+    actualizarLecturas(); // Primera carga inmediata al abrir la página
+    const intervalo = setInterval(actualizarLecturas, 5000); // Se repite cada 5 segundos
+
+    return () => clearInterval(intervalo); // Limpieza del temporizador al salir de la pantalla
+  }, []);
+
+  // Validación de rangos cruzados para cambiar alertas de color de forma automática
+  const phSaludable = ph >= 5.5 && ph <= 7.3 && tds < 1000;
 
   return (
     <div className="dashboard-layout">
@@ -72,12 +100,16 @@ function Dashboard() {
                 </svg>
                 <span>NIVEL DE ACIDEZ (pH)</span>
               </div>
-              <span className="badge badge-green">SALUDABLE</span>
+              {/* Cambia dinámicamente de color según los datos en tiempo real */}
+              <span className={`badge ${ph >= 5.5 && ph <= 7.3 ? 'badge-green' : 'badge-red'}`}>
+                {ph >= 5.5 && ph <= 7.3 ? 'SALUDABLE' : 'ALERTA'}
+              </span>
             </div>
             
             <div className="card-body">
               <div className="main-metric">
-                <span className="value">7.8</span>
+                {/* Muestra el pH en vivo con dos decimales */}
+                <span className="value">{ph.toFixed(2)}</span>
                 <span className="unit">pH</span>
               </div>
               <div className="sub-metric">
@@ -87,7 +119,6 @@ function Dashboard() {
             </div>
 
             <div className="chart-placeholder">
-              {/* Simulación SVG de las ondas de datos */}
               <svg viewBox="0 0 400 80" className="wave-graphic" preserveAspectRatio="none">
                 <path d="M0,60 C40,40 60,70 100,50 C140,30 160,80 200,40 C240,0 260,70 300,30 C340,-10 360,60 400,20 L400,80 L0,80 Z" fill="url(#grad1)"></path>
                 <defs>
@@ -101,30 +132,33 @@ function Dashboard() {
 
             <div className="card-footer">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
-              <span>Próxima calibración programada en 4 días.</span>
+              <span>Dato modular procesado externamente en datosph.js</span>
             </div>
           </article>
 
-          {/* Tarjeta de Turbidez */}
+          {/* Tarjeta de Turbidez (Ahora enlazada al TDS real de tu blynk) */}
           <article className="data-card">
             <div className="card-header">
               <div className="card-title">
                 <svg viewBox="0 0 24 24" fill="none" stroke="#0073cc" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                   <path d="M12 22a7 7 0 0 0 7-7c0-2-1-3.9-3-5.5s-3.5-4-4-6.5c-.5 2.5-2 4.9-4 6.5C6 11.1 5 13 5 15a7 7 0 0 0 7 7z"></path>
                 </svg>
-                <span>TURBIDEZ (NTU)</span>
+                <span>TURBIDEZ (NTU / TDS)</span>
               </div>
-              <span className="badge badge-green">ÓPTIMO</span>
+              <span className={`badge ${tds < 1000 ? 'badge-green' : 'badge-red'}`}>
+                {tds < 1000 ? 'ÓPTIMO' : 'ALTO RIESGO'}
+              </span>
             </div>
             
             <div className="card-body">
               <div className="main-metric">
-                <span className="value">5</span>
-                <span className="unit">NTU</span>
+                {/* Muestra el valor entero real del TDS */}
+                <span className="value">{tds}</span>
+                <span className="unit">ppm</span>
               </div>
               <div className="sub-metric">
                 <span className="label">NIVEL OBJETIVO</span>
-                <span className="range">&lt; 5.0 NTU</span>
+                <span className="range">&lt; 1000 ppm</span>
               </div>
             </div>
 
@@ -155,14 +189,21 @@ function Dashboard() {
                 </svg>
                 <span>ÍNDICE PURECODE (SALUD HÍDRICA)</span>
               </div>
-              <span className="badge badge-blue">ESTABLE</span>
+              <span className={`badge ${phSaludable ? 'badge-blue' : 'badge-red'}`}>
+                {phSaludable ? 'ESTABLE' : 'PELIGRO'}
+              </span>
             </div>
             <div className="index-body">
-              <div className="progress-circle">
-                <span className="percentage">98%</span>
+              <div className="progress-circle" style={{ borderColor: phSaludable ? '#0073cc' : '#D3435C' }}>
+                <span className="percentage">{phSaludable ? '98%' : 'Alerta'}</span>
               </div>
               <div className="index-info">
-                <p>Las variables cruzadas no muestran riesgo de contaminación inminente.</p>
+                <p>
+                  {phSaludable 
+                    ? "Las variables cruzadas no muestran riesgo de contaminación inminente." 
+                    : "¡ATENCIÓN! El pH o los valores de sólidos disueltos se encuentran fuera del rango seguro."
+                  }
+                </p>
               </div>
             </div>
           </article>
