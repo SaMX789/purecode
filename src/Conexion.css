@@ -331,4 +331,71 @@
   color: #0073cc;
 }
 
-/* La Barra de Navegación Inferior comparte estilos con el Dashboard (asegúrate de no duplicarlos si los tienes globales) */
+/* =========================================
+   FORMULARIO CONFIGURACIÓN DE RED (NUEVO)
+========================================= */
+.tarjeta-config-red {
+  display: flex;
+  flex-direction: column;
+}
+
+.formulario-red {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  width: 100%;
+  margin-top: 8px;
+}
+
+.grupo-input {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.grupo-input label {
+  font-size: 13px;
+  font-weight: 600;
+  color: #475569;
+}
+
+.grupo-input input {
+  width: 100%;
+  padding: 12px 14px;
+  font-size: 14px;
+  border: 1px solid #e2e8f0;
+  border-radius: 6px;
+  background-color: #f8fafc;
+  color: #0f172a;
+  outline: none;
+  transition: all 0.2s ease;
+}
+
+/* Estado de enfoque (focus) del input */
+.grupo-input input:focus {
+  border-color: #0073cc;
+  background-color: #ffffff;
+  box-shadow: 0 0 0 3px rgba(0, 115, 204, 0.1);
+}
+
+/* Botón de envío */
+.btn-enviar-red {
+  background-color: #0f172a; /* Mismo tono oscuro del avatar para balancear el diseño */
+  color: #ffffff;
+  font-size: 14px;
+  font-weight: 700;
+  padding: 14px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background-color 0.2s ease, transform 0.1s ease;
+  margin-top: 4px;
+}
+
+.btn-enviar-red:hover {
+  background-color: #1e293b;
+}
+
+.btn-enviar-red:active {
+  transform: scale(0.98);
+}
