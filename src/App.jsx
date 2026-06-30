@@ -29,23 +29,25 @@ function App() {
     return () => clearTimeout(timer); // Limpieza del timer al desmontar
   }, []);
 
-  // 4. Función que se ejecuta al presionar "Iniciar sesión"
+// 4. Función que se ejecuta al presionar "Iniciar sesión"
   const manejarEnvio = async (e) => {
     e.preventDefault();
 
     setProcesandoLogin(true); // Mostramos "Cargando..." en el botón
     setError(''); // Limpiamos errores previos
 
-    // NUEVO: Llamamos a Firebase para verificar al usuario
+    // Llamamos a Firebase para verificar al usuario
     const resultado = await iniciarSesion(email, password);
 
     if (resultado.exito) {
       console.log('Inicio de sesión exitoso. Redirigiendo...');
       navigate('/dashboard'); 
     } else {
-      // CAMBIO: Personalizamos el error dependiendo de qué falló en Firebase
-      if (resultado.error === 'auth/invalid-credential') {
-        setError('Correo o contraseña incorrectos.');
+      // CAMBIO: Agregamos la validación para cuando el correo no está verificado
+      if (resultado.error === 'auth/email-not-verified') {
+        setError('Debes verificar tu correo electrónico antes de iniciar sesión. Revisa tu bandeja de entrada.');
+      } else if (resultado.error === 'auth/invalid-credential') {
+        setError('Correo o contraseña incorrectos.'); // Ajuste de gramática sugerido
       } else if (resultado.error === 'auth/user-not-found') {
          setError('No existe una cuenta con este correo.');
       } else if (resultado.error === 'auth/too-many-requests') {
@@ -56,7 +58,6 @@ function App() {
     }
     
     setProcesandoLogin(false);
-
   };
 
   // 5. Condición inicial: Si está cargando, mostramos la gotita y detenemos el renderizado del resto

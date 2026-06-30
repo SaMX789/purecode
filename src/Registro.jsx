@@ -20,14 +20,20 @@ function Registro() {
       alert("Las contraseñas no coinciden");
       return;
     }
-    const exito = await registrarUsuario(nombre, email, password);
-
-    if(exito){
-      alert("Registro Exitoso");
+    const resultado = await registrarUsuario(nombre, email, password);
+    // 2. Evaluamos la propiedad 'exito' dentro de ese objeto
+    if (resultado.exito) {
+      alert("Verifique su correo electronico para activar la cuenta");
       navigate("/");
-    }
-    else{
-      alert ("Error no se pudo realizar el registro");
+    } else {
+      // 3. (Opcional pero recomendado) Puedes manejar errores específicos de Firebase
+      if (resultado.error === 'auth/email-already-in-use') {
+        alert("Error: Este correo electrónico ya está registrado.");
+      } else if (resultado.error === 'auth/weak-password') {
+        alert("Error: La contraseña es demasiado débil (mínimo 6 caracteres).");
+      } else {
+        alert("Error: No se pudo realizar el registro. Código: " + resultado.error);
+      }
     }
   };
 

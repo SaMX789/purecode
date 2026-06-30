@@ -1,29 +1,34 @@
 import { db, auth } from "./FireBase.js"; 
 import { doc, setDoc } from "firebase/firestore";
-import { createUserWithEmailAndPassword, signInWithEmailAndPassword } from "firebase/auth";
-
+// CAMBIO: Se agregó sendEmailVerification a las importaciones de Firebase Auth
+import { createUserWithEmailAndPassword, signInWithEmailAndPassword, sendEmailVerification, signOut } from "firebase/auth";
 
 // EXPORTAMOS la función para poder llamarla desde otro archivo
 export async function registrarUsuario(nombre, email, contrasenia) {
   try {
     // PASO 1: Crear la cuenta segura en Authentication
-    // Firebase se encarga de la contraseña aquí, tú no tienes que guardarla
     const userCredential = await createUserWithEmailAndPassword(auth, email, contrasenia);
     const usuario = userCredential.user;
 
+    // CAMBIO: Enviar el correo de verificación inmediatamente después de crear el usuario
+    await sendEmailVerification(usuario);
+    console.log("Correo de verificación enviado a:", email);
+
     // PASO 2: Guardar el resto de los datos en Firestore (SIN la contraseña)
-    // Usamos el 'uid' (User ID) generado por Auth como el ID del documento
     await setDoc(doc(db, "RegistrarUsuarios", usuario.uid), {
       nombre: nombre,
       email: email
     });
     
-    console.log("¡Registro exitoso! ID del documento: ", usuario.uid);
-    return true;
+    // CAMBIO: Forzar el cierre de sesión tras el registro. 
+    await signOut(auth);
+
+    console.log("¡Registro exitoso y correo enviado! ID del documento: ", usuario.uid);
+    return { exito: true, verificado: false };
     
   } catch (error) {
     console.error("Error al registrar en la base de datos: ", error);
-    return false;
+    return { exito: false, error: error.code };
   }
 }
 
@@ -33,11 +38,21 @@ export async function iniciarSesion(email, contrasenia) {
     const userCredential = await signInWithEmailAndPassword(auth, email, contrasenia);
     const usuario = userCredential.user;
     
+    // CAMBIO: Validar si el usuario ya confirmó su cuenta mediante el enlace de su correo
+    if (!usuario.emailVerified) {
+      console.warn("El usuario no ha verificado su correo electrónico.");
+      
+      // Cerramos la sesión para evitar que el cliente conserve un token activo sin verificar
+      await auth.signOut();
+      
+
+      return { exito: false, error: "auth/email-not-verified" };
+    }
+
     console.log("¡Inicio de sesión exitoso!", usuario.email);
     return { exito: true, usuario: usuario }; // Retornamos éxito y los datos del usuario
     
   } catch (error) {
-    // Si la contraseña es incorrecta o el usuario no existe, caerá aquí
     console.error("Error al iniciar sesión: ", error.code);
     return { exito: false, error: error.code }; // Retornamos fallo y el código de error
   }
