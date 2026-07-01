@@ -488,3 +488,38 @@
 .btn-bloque {
   width: 100%;
 }
+/* --- Estilos para el aviso flotante --- */
+.toast-personalizado {
+  position: fixed;
+  bottom: 90px; /* Queda justo por encima de tu barra de navegación inferior */
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: #4caf50; /* Un verde éxito muy vivo */
+  color: white;
+  padding: 12px 24px;
+  border-radius: 30px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  box-shadow: 0px 4px 15px rgba(0, 0, 0, 0.2);
+  z-index: 2000;
+  font-weight: 600;
+  animation: slideUp 0.3s ease-out;
+}
+
+.toast-icono {
+  width: 20px;
+  height: 20px;
+}
+
+/* Animación de entrada suave */
+@keyframes slideUp {
+  from {
+    bottom: 60px;
+    opacity: 0;
+  }
+  to {
+    bottom: 90px;
+    opacity: 1;
+  }
+}
