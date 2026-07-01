@@ -21,6 +21,9 @@ const irARegistros = () => {
 
     
 
+  // NUEVO: Historial para dibujar la ola (10 puntos de datos)
+  const [historialPh, setHistorialPh] = useState(Array(10).fill(7.0));
+  const [historialTds, setHistorialTds] = useState(Array(10).fill(5));
   // =========================================================
   // EFECTO DE CONEXIÓN: Consulta a datosph.js cada 5 segundos
   // =========================================================
@@ -32,6 +35,15 @@ const irARegistros = () => {
       const valorTdsPRUEBAS = 520;
       setPh(valorPh); // Actualiza el estado con el valor real del pH
       setTds(valorTds);
+      // NUEVO: Actualizamos el historial desplazando los datos a la izquierda
+      setHistorialPh(historialAnterior => {
+        // Tomamos todos los elementos menos el primero (slice(1)) y agregamos el nuevo al final
+        return [...historialAnterior.slice(1), valorPh];
+      });
+      setHistorialTds(historialAnterior => {
+        // Tomamos todos los elementos menos el primero (slice(1)) y agregamos el nuevo al final
+        return [...historialAnterior.slice(1), valorTds];
+      });
     };
 
     actualizarLecturas(); // Primera carga inmediata al abrir la página
@@ -43,6 +55,37 @@ const irARegistros = () => {
   // Validación de rangos cruzados para cambiar alertas de color de forma automática
   const phSaludable = ph >= 5.5 && ph <= 7.3 && tds < 1000;
 
+  // NUEVA VERSIÓN: Función universal para generar curvas SVG dinámicas
+  const generarCurvaSVG = (datos, minVal, maxVal) => {
+    const rango = maxVal - minVal;
+    let path = "M0,80 "; 
+    
+    datos.forEach((valor, index) => {
+      const x = (index / (datos.length - 1)) * 400;
+      const valorLimitado = Math.max(minVal, Math.min(maxVal, valor));
+      const y = 80 - ((valorLimitado - minVal) / rango) * 80;
+      
+      if (index === 0) {
+         path += `L${x},${y} `;
+      } else {
+         const prevX = ((index - 1) / (datos.length - 1)) * 400;
+         const prevValorLimitado = Math.max(minVal, Math.min(maxVal, datos[index-1]));
+         const prevY = 80 - ((prevValorLimitado - minVal) / rango) * 80;
+         
+         const controlX1 = prevX + (x - prevX) / 2;
+         const controlY1 = prevY;
+         const controlX2 = prevX + (x - prevX) / 2;
+         const controlY2 = y;
+         
+         path += `C${controlX1},${controlY1} ${controlX2},${controlY2} ${x},${y} `;
+      }
+    });
+    
+    path += "L400,80 Z"; 
+    return path;
+  };
+
+  
   return (
     <div className="dashboard-layout">
       
@@ -61,7 +104,9 @@ const irARegistros = () => {
               <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
             </svg>
           </button>
-          <div className="user-avatar">M</div>
+          <div className="user-avatar" onClick={() => navigate('/perfil')} style={{ cursor: 'pointer' }}>
+            M
+          </div>
         </div>
       </header>
 
@@ -73,11 +118,30 @@ const irARegistros = () => {
           <h1>Resumen Ambiental</h1>
           <div className="status-indicator">
             <span className="dot pulse"></span>
-            <p>Actualizando en vivo desde ESP32 Cluster #0421</p>
+            <p>Actualizando en vivo desde ESP32</p>
           </div>
         </section>
 
-        <br />
+        {/* Botones de acción */}
+        <section className="action-buttons">
+          <button className="btn-primary">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M21 2v6h-6"></path>
+              <path d="M3 12a9 9 0 0 1 15-6.7L21 8"></path>
+              <path d="M3 22v-6h6"></path>
+              <path d="M21 12a9 9 0 0 1-15 6.7L3 16"></path>
+            </svg>
+            FORZAR ACTUALIZACIÓN
+          </button>
+          <button className="btn-secondary" onClick={() => navigate('/registros')}>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+              <polyline points="7 10 12 15 17 10"></polyline>
+              <line x1="12" y1="15" x2="12" y2="3"></line>
+            </svg>
+            CREAR REGISTRO
+          </button>
+        </section>
 
         {/* Tarjetas de Datos */}
         <section className="cards-grid">
@@ -111,7 +175,11 @@ const irARegistros = () => {
 
             <div className="chart-placeholder">
               <svg viewBox="0 0 400 80" className="wave-graphic" preserveAspectRatio="none">
-                <path d="M0,60 C40,40 60,70 100,50 C140,30 160,80 200,40 C240,0 260,70 300,30 C340,-10 360,60 400,20 L400,80 L0,80 Z" fill="url(#grad1)"></path>
+                <path 
+                  d={generarCurvaSVG(historialPh, 6.0, 8.0)} 
+                  fill="url(#grad1)"
+                  style={{ transition: 'd 1s ease-in-out' }} 
+                ></path>
                 <defs>
                   <linearGradient id="grad1" x1="0%" y1="0%" x2="0%" y2="100%">
                     <stop offset="0%" style={{stopColor:'#0073cc', stopOpacity:0.15}} />
@@ -155,7 +223,11 @@ const irARegistros = () => {
 
             <div className="chart-placeholder">
               <svg viewBox="0 0 400 80" className="wave-graphic" preserveAspectRatio="none">
-                <path d="M0,50 C50,30 80,60 130,40 C180,20 220,70 270,50 C320,30 360,60 400,40 L400,80 L0,80 Z" fill="url(#grad2)"></path>
+                <path 
+                  d={generarCurvaSVG(historialTds, 0, 1500)} 
+                  fill="url(#grad2)"
+                  style={{ transition: 'd 1s ease-in-out' }} 
+                ></path>
                 <defs>
                   <linearGradient id="grad2" x1="0%" y1="0%" x2="0%" y2="100%">
                     <stop offset="0%" style={{stopColor:'#0073cc', stopOpacity:0.15}} />

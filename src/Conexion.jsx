@@ -35,7 +35,9 @@ function Conexion() {
           <h2>PureCode</h2>
         </div>
         <div className="conexion-user-actions">
-          <div className="user-avatar">M</div>
+          <div className="user-avatar" onClick={() => navigate('/perfil')} style={{ cursor: 'pointer' }}>
+            M
+          </div>
         </div>
       </header>
 

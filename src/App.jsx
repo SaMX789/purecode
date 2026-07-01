@@ -3,7 +3,7 @@ import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import Splash from './components/Splash'; // <-- Importamos tu pantalla de carga
 import './App.css'; // Estilos
-import { iniciarSesion } from './Registrar.js'; // <-- Ajusta la ruta si es diferente
+import { iniciarSesion, restablecerContrasenia} from './Registrar.js'; // <-- Ajusta la ruta si es diferente
 
 function App() {
   // 1. Estado para controlar la pantalla de carga (arranca en true)
@@ -19,6 +19,32 @@ function App() {
   const [procesandoLogin, setProcesandoLogin] = useState(false);
 
   const navigate = useNavigate(); // <-- Inicializamos el hook de navegación
+
+  const manejarRestablecerPassword = async (e) => {
+    e.preventDefault(); // Evita que la página se recargue por el enlace <a>
+
+    // Validamos que el campo de email no esté vacío
+    if (!email) {
+      alert("Por favor, ingresa tu correo electrónico en el campo superior para enviarte el enlace de restablecimiento.");
+      return;
+    }
+
+    // Llamamos a la función de Firebase
+    const resultado = await restablecerContrasenia(email);
+
+    // Evaluamos el resultado
+    if (resultado.exito) {
+      alert(`Se ha enviado un enlace para restablecer tu contraseña a: ${email}`);
+    } else {
+      if (resultado.error === 'auth/user-not-found') {
+        alert("No existe una cuenta registrada con este correo.");
+      } else if (resultado.error === 'auth/invalid-email') {
+        alert("El formato del correo electrónico es inválido.");
+      } else {
+        alert("Ocurrió un error al intentar enviar el correo. Código: " + resultado.error);
+      }
+    }
+  };
 
   // 3. Temporizador de 3 segundos para apagar el Splash Screen
   useEffect(() => {
@@ -99,7 +125,9 @@ function App() {
           <div className="grupo-input">
             <div className="cabecera-password">
               <label htmlFor="password">CONTRASEÑA</label>
-              <a href="#" className="link-olvido">¿Olvidaste tu contraseña?</a>
+              <a href="#" className="link-olvido" onClick={manejarRestablecerPassword}>
+                ¿Olvidaste tu contraseña?
+              </a>
             </div>
             
             <div className="contenedor-password">
