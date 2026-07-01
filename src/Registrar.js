@@ -1,7 +1,7 @@
 import { db, auth } from "./FireBase.js"; 
 import { doc, setDoc } from "firebase/firestore";
 // CAMBIO: Se agregó sendEmailVerification a las importaciones de Firebase Auth
-import { createUserWithEmailAndPassword, signInWithEmailAndPassword, sendEmailVerification, signOut } from "firebase/auth";
+import { createUserWithEmailAndPassword, signInWithEmailAndPassword, sendEmailVerification, signOut, sendPasswordResetEmail } from "firebase/auth";
 
 // EXPORTAMOS la función para poder llamarla desde otro archivo
 export async function registrarUsuario(nombre, email, contrasenia) {
@@ -55,5 +55,17 @@ export async function iniciarSesion(email, contrasenia) {
   } catch (error) {
     console.error("Error al iniciar sesión: ", error.code);
     return { exito: false, error: error.code }; // Retornamos fallo y el código de error
+  }
+}
+
+// Función para enviar el correo de restablecimiento de contraseña
+export async function restablecerContrasenia(email) {
+  try {
+    await sendPasswordResetEmail(auth, email);
+    console.log("Correo de restablecimiento enviado a:", email);
+    return { exito: true };
+  } catch (error) {
+    console.error("Error al enviar correo de restablecimiento: ", error.code);
+    return { exito: false, error: error.code };
   }
 }

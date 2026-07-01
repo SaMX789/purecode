@@ -16,10 +16,20 @@ function Registro() {
 
   const manejarRegistro =async (e) => {
     e.preventDefault();
+    //1. Validamos que las contraseñas coincidan antes de llamar a la función de registro
     if (password !== confirmarPassword) {
       alert("Las contraseñas no coinciden");
       return;
     }
+
+    //NUEVO: Validar la complejidad de la contraseña
+    const passwordRegex = /^(?=.*[a-zA-Z])(?=.*\d)(?=.*[!@#$%^&*(),.?":{}|<>]).{6,}$/;
+    
+    if (!passwordRegex.test(password)) {
+      alert("Error: La contraseña debe tener al menos 6 caracteres e incluir letras, números y símbolos.");
+      return; // Detiene la ejecución para no gastar peticiones a Firebase
+    }
+
     const resultado = await registrarUsuario(nombre, email, password);
     // 2. Evaluamos la propiedad 'exito' dentro de ese objeto
     if (resultado.exito) {
