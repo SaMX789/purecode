@@ -1,15 +1,41 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { obtenerEstadoDispositivo } from './datosph'; // <-- CORREGIDO: Ahora coincide exactamente con tu datosph.js
 import './Conexion.css';
 
 function Conexion() {
   const navigate = useNavigate();
 
-  // Estados para capturar las credenciales de la red
+  // Estados para capturar las credenciales de la red (Original de tus compañeros)
   const [ssid, setSsid] = useState('');
   const [password, setPassword] = useState('');
 
-  // Función para manejar el envío del formulario
+  // =========================================================
+  // ESTADOS DINÁMICOS CORREGIDOS
+  // =========================================================
+  const [estaEnLinea, setEstaEnLinea] = useState(false);
+  const [calidadSenal, setCalidadSenal] = useState('Sin Señal (0%)');
+
+  // Temporizador en segundo plano que revisa el estado cada 4 segundos
+  useEffect(() => {
+    const verificarRed = async () => {
+      const enLinea = await obtenerEstadoDispositivo(); // <-- CORREGIDO: Llamamos a la función correcta
+      setEstaEnLinea(enLinea);
+      
+      if (enLinea) {
+        setCalidadSenal('Excelente (98%)');
+      } else {
+        setCalidadSenal('Sin Señal (0%)');
+      }
+    };
+
+    verificarRed(); // Ejecuta inmediatamente al abrir la pestaña
+    const intervalo = setInterval(verificarRed, 4000); // Bucle automático
+
+    return () => clearInterval(intervalo);
+  }, []);
+
+  // Función para manejar el envío del formulario (Original de tus compañeros)
   const handleSubmit = (e) => {
     e.preventDefault();
     
@@ -26,7 +52,7 @@ function Conexion() {
   return (
     <div className="conexion-layout">
       
-      {/* Barra superior */}
+      {/* Barra superior (Original) */}
       <header className="conexion-header">
         <div className="conexion-logo-group">
           <svg viewBox="0 0 24 24" fill="none" stroke="#0073cc" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="logo-icon">
@@ -45,34 +71,47 @@ function Conexion() {
       <main className="conexion-content">
         <h1 className="titulo-seccion">Estado de Conexión</h1>
 
-        {/* Tarjeta 1: Estado Principal */}
+        {/* Tarjeta 1: Estado Principal (FUSIONADA DINÁMICA) */}
         <section className="card-estado-principal">
           <div className="anillos-concentricos">
             <div className="caja-estado">
-              <div className="punto-verde-pulso"></div>
-              <span className="texto-activo">Activo</span>
+              {/* Cambia dinámicamente de color: verde si está en línea, rojo si se desconecta */}
+              <div 
+                style={{ 
+                  width: '12px', 
+                  height: '12px', 
+                  borderRadius: '50%', 
+                  backgroundColor: estaEnLinea ? '#23C48E' : '#D3435C',
+                  marginRight: '8px',
+                  display: 'inline-block'
+                }}
+              ></div>
+              <span className="texto-activo">
+                {estaEnLinea ? "Activo" : "Desconectado"}
+              </span>
             </div>
           </div>
           <div className="info-estado">
-            <h3>Estado: En línea</h3>
+            <h3>Estado: {estaEnLinea ? "En línea" : "Desconectado"}</h3>
             <p>ID del Dispositivo ESP32: #0421</p>
           </div>
         </section>
 
-        {/* Tarjeta 3: Calidad de Señal */}
+        {/* Tarjeta 3: Calidad de Señal (FUSIONADA DINÁMICA) */}
         <section className="tarjeta-senal">
           <div className="senal-info">
             <span className="etiqueta-blanca-transparente">CALIDAD DE SEÑAL</span>
-            <h3>Excelente (98%)</h3>
+            <h3>{calidadSenal}</h3>
           </div>
           <div className="senal-icono">
             <svg viewBox="0 0 100 100" preserveAspectRatio="none">
-              <polygon points="0,100 100,100 100,0" fill="white" />
+              {/* Modifica la opacidad del triángulo si no hay señal para dar efecto visual */}
+              <polygon points="0,100 100,100 100,0" fill="white" fillOpacity={estaEnLinea ? "1" : "0.2"} />
             </svg>
           </div>
         </section>
 
-        {/* NUEVA TARJETA: Formulario de Configuración Wi-Fi */}
+        {/* NUEVA TARJETA: Formulario de Configuración Wi-Fi (Estructura Original intacta) */}
         <section className="tarjeta-datos tarjeta-config-red">
           <div className="tarjeta-cabecera">
             <span className="etiqueta-gris">Configurar Red Wi-Fi</span>
@@ -113,11 +152,9 @@ function Conexion() {
           </form>
         </section>
 
-        
-
       </main>
 
-      {/* Barra de Navegación Inferior (PWA) */}
+      {/* Barra de Navegación Inferior (PWA - Estructura Original intacta) */}
       <nav className="bottom-nav">
         <button className="nav-item" onClick={() => navigate('/dashboard')}>
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
