@@ -14,6 +14,15 @@ function Registro() {
 
   const navigate = useNavigate();
 
+  // NUEVO: Validaciones en tiempo real
+  const tieneLongitud = password.length >= 6;
+  const tieneLetra = /[a-zA-Z]/.test(password);
+  const tieneNumero = /\d/.test(password);
+  const tieneSimbolo = /[!@#$%^&*(),.?":{}|<>]/.test(password);
+// Calculamos el nivel de fuerza (0 a 4) para la barra de progreso
+  const nivelSeguridad = [tieneLongitud, tieneLetra, tieneNumero, tieneSimbolo].filter(Boolean).length;
+  const passwordValida = nivelSeguridad === 4; // Solo es válida si cumple las 4
+
   const manejarRegistro =async (e) => {
     e.preventDefault();
     //1. Validamos que las contraseñas coincidan antes de llamar a la función de registro
@@ -22,12 +31,9 @@ function Registro() {
       return;
     }
 
-    //NUEVO: Validar la complejidad de la contraseña
-    const passwordRegex = /^(?=.*[a-zA-Z])(?=.*\d)(?=.*[!@#$%^&*(),.?":{}|<>]).{6,}$/;
-    
-    if (!passwordRegex.test(password)) {
-      alert("Error: La contraseña debe tener al menos 6 caracteres e incluir letras, números y símbolos.");
-      return; // Detiene la ejecución para no gastar peticiones a Firebase
+    if (!passwordValida) {
+      alert("Error: La contraseña no cumple con todos los requisitos de seguridad.");
+      return;
     }
 
     const resultado = await registrarUsuario(nombre, email, password);
@@ -119,6 +125,42 @@ function Registro() {
                 </button>
               </div>
             </div>
+            
+            {/*UI de Validación en Tiempo Real*/}
+            <div className="registro-validador-password">
+              
+              <div className="indicador-fuerza-texto">
+                <span className="etiqueta-fija">Nivel de seguridad:</span>
+                <span className={`etiqueta-dinamica texto-nivel-${nivelSeguridad}`}>
+                  {nivelSeguridad === 0 && "Muy débil"}
+                  {nivelSeguridad === 1 && "Débil"}
+                  {nivelSeguridad === 2 && "Regular"}
+                  {nivelSeguridad === 3 && "Buena"}
+                  {nivelSeguridad === 4 && "Fuerte"}
+                </span>
+              </div>
+
+              {/* Barra de progreso visual */}
+              <div className="barra-seguridad-fondo">
+                <div className={`barra-seguridad-progreso nivel-${nivelSeguridad}`}></div>
+              </div>
+
+              {/* Lista de requisitos (Cambia de estilo según se cumplan) */}
+              <ul className="lista-requisitos">
+                <li className={tieneLongitud ? 'cumplido' : ''}>
+                  {tieneLongitud ? <CheckIcon /> : <CircleIcon />} Mínimo 6 caracteres
+                </li>
+                <li className={tieneLetra ? 'cumplido' : ''}>
+                  {tieneLetra ? <CheckIcon /> : <CircleIcon />} Al menos una letra
+                </li>
+                <li className={tieneNumero ? 'cumplido' : ''}>
+                  {tieneNumero ? <CheckIcon /> : <CircleIcon />} Al menos un número
+                </li>
+                <li className={tieneSimbolo ? 'cumplido' : ''}>
+                  {tieneSimbolo ? <CheckIcon /> : <CircleIcon />} Al menos un símbolo
+                </li>
+              </ul>
+            </div>
 
             {/* Confirmar Password */}
             <div className="registro-grupo-input">
@@ -183,5 +225,13 @@ function Registro() {
     </div>
   );
 }
+
+// Componentes SVG pequeñitos para la lista
+const CheckIcon = () => (
+  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#10b981" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+);
+const CircleIcon = () => (
+  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"></circle></svg>
+);
 
 export default Registro;
