@@ -236,3 +236,92 @@
 .registro-footer-links a:hover {
   color: #1a202c;
 }
+
+
+/* =========================================
+   VALIDADOR DE CONTRASEÑA EN TIEMPO REAL
+========================================= */
+.registro-validador-password {
+  background-color: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 6px;
+  padding: 12px 14px;
+  margin-top: -4px; /* Para que parezca conectado al input */
+  margin-bottom: 8px;
+}
+
+/* Textos sobre la barra de progreso */
+.indicador-fuerza-texto {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.etiqueta-fija {
+  color: #64748b;
+  letter-spacing: 0.5px;
+}
+
+.etiqueta-dinamica {
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  transition: color 0.3s ease;
+}
+
+/* Colores dinámicos del texto (Coinciden con la barra) */
+.texto-nivel-0 { color: #94a3b8; } /* Gris - Sin empezar */
+.texto-nivel-1 { color: #ef4444; } /* Rojo - Débil */
+.texto-nivel-2 { color: #f59e0b; } /* Naranja - Regular */
+.texto-nivel-3 { color: #eab308; } /* Amarillo - Buena */
+.texto-nivel-4 { color: #10b981; } /* Verde - Fuerte */
+
+/* Barra de progreso de seguridad */
+.barra-seguridad-fondo {
+  width: 100%;
+  height: 4px;
+  background-color: #e2e8f0;
+  border-radius: 2px;
+  margin-bottom: 12px;
+  overflow: hidden;
+}
+
+.barra-seguridad-progreso {
+  height: 100%;
+  border-radius: 2px;
+  transition: width 0.3s ease, background-color 0.3s ease;
+  width: 0%;
+}
+
+.nivel-1 { width: 25%; background-color: #ef4444; } /* Rojo (Débil) */
+.nivel-2 { width: 50%; background-color: #f59e0b; } /* Naranja (Regular) */
+.nivel-3 { width: 75%; background-color: #eab308; } /* Amarillo (Buena) */
+.nivel-4 { width: 100%; background-color: #10b981;} /* Verde (Fuerte) */
+
+/* Lista de requisitos */
+.lista-requisitos {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: grid;
+  grid-template-columns: 1fr 1fr; /* Muestra en dos columnas para ahorrar espacio */
+  gap: 8px 12px;
+}
+
+.lista-requisitos li {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  color: #64748b; /* Gris apagado por defecto */
+  font-weight: 500;
+  transition: color 0.2s ease;
+}
+
+/* Cuando el usuario cumple el requisito, el texto se pinta oscuro */
+.lista-requisitos li.cumplido {
+  color: #0f172a;
+  font-weight: 600;
+}

@@ -93,7 +93,7 @@ function Conexion() {
           </div>
           <div className="info-estado">
             <h3>Estado: {estaEnLinea ? "En línea" : "Desconectado"}</h3>
-            <p>ID del Dispositivo ESP32: #0421</p>
+            <p>ID del Dispositivo ESP32:</p>
           </div>
         </section>
 
