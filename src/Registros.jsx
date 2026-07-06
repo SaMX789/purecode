@@ -23,7 +23,7 @@ function Registros() {
   const [contador, setContador] = useState(15);
 
     const [usuarioId, setUsuarioId] = useState(null);
-
+  
   useEffect(() => {
     // Al cargar la pantalla, Firebase nos dice qué usuario tiene la sesión activa
     const desuscribir = onAuthStateChanged(auth, (user) => {
@@ -198,6 +198,24 @@ function Registros() {
           <p>Registros ambientales archivados</p>
         </section>
 
+        {/* Tarjetas de Resumen Promedio */}
+        <section className="registros-resumen-grid">
+          <div className="tarjeta-resumen">
+            <span className="resumen-label">pH</span>
+            <div className="resumen-valor">
+              <span className="numero azul">0</span>
+              
+            </div>
+          </div>
+          <div className="tarjeta-resumen">
+            <span className="resumen-label">Turbidez</span>
+            <div className="resumen-valor">
+              <span className="numero cafe">0</span>
+              <span className="estado">PPM</span>
+            </div>
+          </div>
+        </section>
+
         {/* Botón Disparador */}
         <section className="registros-acciones">
           <button className="btn-registro-disparar" onClick={iniciarFlujo}>
@@ -238,7 +256,24 @@ function Registros() {
           </div>
         </section>
 
-        
+        {/* Análisis de Correlación */}
+        <section className="tarjeta-analisis">
+          <div className="icono-analisis-contenedor">
+            <svg viewBox="0 0 24 24" fill="none" stroke="#0073cc" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+              <line x1="12" y1="8" x2="12" y2="16"></line>
+              <line x1="8" y1="12" x2="8" y2="16"></line>
+              <line x1="16" y1="10" x2="16" y2="16"></line>
+            </svg>
+          </div>
+          <div className="texto-analisis">
+            <h2>Consejos para una Medición Precisa</h2>
+            <h3>Espera la estabilización (15-30 segundos):</h3>
+            <p>Cuando sumerjas los sensores en el agua, no guardes el primer dato que veas. El electrodo de vidrio del sensor de pH necesita entre 15 y 30 segundos para reaccionar químicamente y adaptarse al nuevo entorno. Espera a que los números dejen de fluctuar en la pantalla antes de registrar tu medición diaria.</p>
+            <h3>La regla de las 2 horas:</h3>
+            <p>Si vas a tomar una muestra de agua en un contenedor para medirla después, asegúrate de hacer la medición dentro de las primeras 2 horas. Pasado este tiempo, el dióxido de carbono (Co2) del aire exterior comenzará a disolverse en el agua, alterando su acidez real y cambiando por completo el valor del pH. ¡Mide fresco para medir bien!</p>
+          </div>
+        </section>
 
       </main>
 
