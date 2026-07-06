@@ -1,25 +1,30 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { obtenerEstadoDispositivo } from './datosph'; // <-- CORREGIDO: Ahora coincide exactamente con tu datosph.js
+import { obtenerEstadoDispositivo } from './datosph';
 import './Conexion.css';
 
 function Conexion() {
   const navigate = useNavigate();
 
-  // Estados para capturar las credenciales de la red (Original de tus compañeros)
+  // =========================================================
+  // ESTADOS DEL COMPONENTE
+  // =========================================================
   const [ssid, setSsid] = useState('');
   const [password, setPassword] = useState('');
-
-  // =========================================================
-  // ESTADOS DINÁMICOS CORREGIDOS
-  // =========================================================
   const [estaEnLinea, setEstaEnLinea] = useState(false);
   const [calidadSenal, setCalidadSenal] = useState('Sin Señal (0%)');
 
-  // Temporizador en segundo plano que revisa el estado cada 4 segundos
+  const [dispositivoSeleccionado, setDispositivoSeleccionado] = useState(null);
+  const [buscandoBluetooth, setBuscandoBluetooth] = useState(false);
+  const [enviandoDatos, setEnviandoDatos] = useState(false); // Nuevo: Para saber si está transmitiendo
+  const [errorBluetooth, setErrorBluetooth] = useState('');
+
+  // =========================================================
+  // LOGICA DE MONITOREO POR LA NUBE (BLYNK)
+  // =========================================================
   useEffect(() => {
     const verificarRed = async () => {
-      const enLinea = await obtenerEstadoDispositivo(); // <-- CORREGIDO: Llamamos a la función correcta
+      const enLinea = await obtenerEstadoDispositivo();
       setEstaEnLinea(enLinea);
       
       if (enLinea) {
@@ -29,30 +34,104 @@ function Conexion() {
       }
     };
 
-    verificarRed(); // Ejecuta inmediatamente al abrir la pestaña
-    const intervalo = setInterval(verificarRed, 4000); // Bucle automático
+    verificarRed();
+    const intervalo = setInterval(verificarRed, 4000);
 
     return () => clearInterval(intervalo);
   }, []);
 
-  // Función para manejar el envío del formulario (Original de tus compañeros)
-  const handleSubmit = (e) => {
-    e.preventDefault();
+  // =========================================================
+  // FUNCIÓN PARA BUSCAR EL ESP32 POR BLUETOOTH
+  // =========================================================
+  const encenderYBuscarBluetooth = async () => {
+    setBuscandoBluetooth(true);
+    setErrorBluetooth('');
     
-    // Aquí conectarás la lógica para enviar los datos al ESP32
-    console.log('Enviando credenciales al ESP32...', { ssid, password });
-    
-    alert(`Enviando credenciales...\nRed: ${ssid}`);
-    
-    // Opcional: Limpiar los campos después del envío
-    // setSsid('');
-    // setPassword('');
+    try {
+      const device = await navigator.bluetooth.requestDevice({
+        filters: [
+          { namePrefix: 'Blynk' },
+          { namePrefix: 'PureCode' }
+        ],
+        optionalServices: ['0000ffe0-0000-1000-8000-00805f9b34fb'] 
+      });
+
+      setDispositivoSeleccionado(device);
+      console.log('Conectado visualmente a:', device.name);
+      
+    } catch (error) {
+      console.error('Error de Bluetooth:', error);
+      setErrorBluetooth('No se seleccionó ningún dispositivo o el navegador no soporta BLE.');
+    } finally {
+      setBuscandoBluetooth(false);
+    }
   };
+
+  // =========================================================
+  // FUNCIÓN PARA ENVIAR LAS CREDENCIALES POR BLUETOOTH
+  // =========================================================
+  const enviarCredencialesPorBLE = async (e) => {
+  e.preventDefault();
+  if (!dispositivoSeleccionado) return;
+
+  setEnviandoDatos(true);
+
+  try {
+    // 1. Conectar al servidor GATT del ESP32
+    console.log("Conectando al servidor GATT...");
+    const server = await dispositivoSeleccionado.gatt.connect();
+    
+    // 2. Obtener el servicio principal
+    const service = await server.getPrimaryService('0000ffe0-0000-1000-8000-00805f9b34fb');
+    
+    // 3. Obtener la característica de escritura
+    const characteristic = await service.getCharacteristic('0000ffe1-0000-1000-8000-00805f9b34fb');
+
+    // 4. Convertir texto a bytes
+    const datosAEnviar = `${ssid},${password}`;
+    const encoder = new TextEncoder();
+    const dataBuffer = encoder.encode(datosAEnviar);
+
+    // 5. Inyectar los datos
+    console.log("Escribiendo datos:", datosAEnviar);
+    await characteristic.writeValue(dataBuffer);
+    
+    alert('¡Datos enviados! El ESP32 ha apagado su Bluetooth y está validando tu Wi-Fi. Espera 6 segundos...');
+
+    // 6. Esperar 6 segundos para verificar el resultado
+    setTimeout(async () => {
+      const enLinea = await obtenerEstadoDispositivo(); // Verifica si Blynk lo ve activo
+      
+      if (enLinea) {
+        // --- CASO ÉXITO ---
+        alert('¡Sincronización Exitosa! El ESP32 se ha conectado a internet.');
+        setDispositivoSeleccionado(null); // Cierra el flujo limpiamente
+        setSsid('');
+        setPassword('');
+      } else {
+        // --- CASO ERROR (Tu estrategia) ---
+        alert('ERROR: El ESP32 no logró conectarse a la red. El hardware ha reiniciado su Bluetooth. Por favor, vuelve a escanear y vincularte.');
+        
+        // FORZAMOS A VINCULARSE OTRA VEZ:
+        setDispositivoSeleccionado(null); // Esto borra el vínculo viejo en React, oculta el formulario y muestra el botón de Buscar.
+        setSsid('');                      // Limpiamos los campos para el siguiente intento
+        setPassword('');
+      }
+      setEnviandoDatos(false);
+    }, 6000);
+
+  } catch (error) {
+    console.error('Error crítico al enviar por BLE:', error);
+    alert('Hubo un problema al transmitir los datos. Intenta reconectar el Bluetooth.');
+    setDispositivoSeleccionado(null); // Si falla la transmisión física, también reiniciamos el botón
+    setEnviandoDatos(false);
+  }
+};
 
   return (
     <div className="conexion-layout">
       
-      {/* Barra superior (Original) */}
+      {/* Barra superior */}
       <header className="conexion-header">
         <div className="conexion-logo-group">
           <svg viewBox="0 0 24 24" fill="none" stroke="#0073cc" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="logo-icon">
@@ -71,11 +150,10 @@ function Conexion() {
       <main className="conexion-content">
         <h1 className="titulo-seccion">Estado de Conexión</h1>
 
-        {/* Tarjeta 1: Estado Principal (FUSIONADA DINÁMICA) */}
+        {/* Tarjeta 1: Estado Principal */}
         <section className="card-estado-principal">
           <div className="anillos-concentricos">
             <div className="caja-estado">
-              {/* Cambia dinámicamente de color: verde si está en línea, rojo si se desconecta */}
               <div 
                 style={{ 
                   width: '12px', 
@@ -93,11 +171,11 @@ function Conexion() {
           </div>
           <div className="info-estado">
             <h3>Estado: {estaEnLinea ? "En línea" : "Desconectado"}</h3>
-            <p>ID del Dispositivo ESP32:</p>
+            <p>ID del Dispositivo ESP32: {dispositivoSeleccionado ? dispositivoSeleccionado.name : 'No seleccionado'}</p>
           </div>
         </section>
 
-        {/* Tarjeta 3: Calidad de Señal (FUSIONADA DINÁMICA) */}
+        {/* Tarjeta 2: Calidad de Señal */}
         <section className="tarjeta-senal">
           <div className="senal-info">
             <span className="etiqueta-blanca-transparente">CALIDAD DE SEÑAL</span>
@@ -105,56 +183,74 @@ function Conexion() {
           </div>
           <div className="senal-icono">
             <svg viewBox="0 0 100 100" preserveAspectRatio="none">
-              {/* Modifica la opacidad del triángulo si no hay señal para dar efecto visual */}
               <polygon points="0,100 100,100 100,0" fill="white" fillOpacity={estaEnLinea ? "1" : "0.2"} />
             </svg>
           </div>
         </section>
 
-        {/* NUEVA TARJETA: Formulario de Configuración Wi-Fi (Estructura Original intacta) */}
+        {/* Panel de Sincronización Bluetooth */}
         <section className="tarjeta-datos tarjeta-config-red">
           <div className="tarjeta-cabecera">
-            <span className="etiqueta-gris">Configurar Red Wi-Fi</span>
+            <span className="etiqueta-gris">Vinculación Local por Bluetooth</span>
             <svg className="icono-pequeno" viewBox="0 0 24 24" fill="none" stroke="#64748b" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.1a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"></path>
-              <circle cx="12" cy="12" r="3"></circle>
+              <path d="M5 7l14 10-9 7V2l9 7L5 17"></path>
             </svg>
           </div>
           
-          <form onSubmit={handleSubmit} className="formulario-red">
-            <div className="grupo-input">
-              <label htmlFor="ssid">Nombre de la red (SSID)</label>
-              <input 
-                type="text" 
-                id="ssid" 
-                placeholder="Ej. Totalplay-A75B" 
-                value={ssid}
-                onChange={(e) => setSsid(e.target.value)}
-                required 
-              />
-            </div>
+          <div className="panel-bluetooth">
+            <p className="descripcion-ble">
+              Para sincronizar el dispositivo a un nuevo módem sin perder internet, presiona el botón para escanear los equipos PureCode cercanos.
+            </p>
 
-            <div className="grupo-input">
-              <label htmlFor="password">Contraseña de la red</label>
-              <input 
-                type="password" 
-                id="password" 
-                placeholder="••••••••••••" 
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required 
-              />
-            </div>
+            {/* Si NO hay dispositivo seleccionado */}
+            {!dispositivoSeleccionado && (
+              <button onClick={encenderYBuscarBluetooth} className="btn-enviar-red" disabled={buscandoBluetooth}>
+                {buscandoBluetooth ? 'Buscando dispositivos...' : 'Encender y Buscar ESP32'}
+              </button>
+            )}
 
-            <button type="submit" className="btn-enviar-red">
-              Actualizar Red ESP32
-            </button>
-          </form>
+            {/* Si SÍ hay dispositivo seleccionado */}
+            {dispositivoSeleccionado && (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                <div className="dispositivo-vinculado">
+                  <div className="icono-check">✓</div>
+                  <div>
+                    <h4>Vinculado con éxito</h4>
+                    <p>{dispositivoSeleccionado.name}</p>
+                  </div>
+                </div>
+
+                <form onSubmit={enviarCredencialesPorBLE} className="formulario-red">
+                  <div className="grupo-input">
+                    <label htmlFor="ssid">Nombre de la nueva red (SSID)</label>
+                    <input 
+                      type="text" id="ssid" placeholder="Ej. Totalplay-A75B" 
+                      value={ssid} onChange={(e) => setSsid(e.target.value)} required 
+                      disabled={enviandoDatos}
+                    />
+                  </div>
+                  <div className="grupo-input">
+                    <label htmlFor="password">Contraseña de la red</label>
+                    <input 
+                      type="password" id="password" placeholder="••••••••••••" 
+                      value={password} onChange={(e) => setPassword(e.target.value)} required 
+                      disabled={enviandoDatos}
+                    />
+                  </div>
+                  <button type="submit" className="btn-enviar-red" style={{ backgroundColor: enviandoDatos ? '#64748b' : '#005bb5' }} disabled={enviandoDatos}>
+                    {enviandoDatos ? 'Transmitiendo al hardware...' : 'Enviar Wi-Fi por Bluetooth'}
+                  </button>
+                </form>
+              </div>
+            )}
+
+            {errorBluetooth && <p className="error-mensaje-ble">{errorBluetooth}</p>}
+          </div>
         </section>
 
       </main>
 
-      {/* Barra de Navegación Inferior (PWA - Estructura Original intacta) */}
+      {/* Barra de Navegación Inferior */}
       <nav className="bottom-nav">
         <button className="nav-item" onClick={() => navigate('/dashboard')}>
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>

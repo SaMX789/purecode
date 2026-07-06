@@ -1,25 +1,37 @@
 /* =========================================
-   LAYOUT GLOBAL
+   VARIABLES GLOBALES Y CONFIGURACIÓN
 ========================================= */
+:root {
+  --bg-main: #f7f9fc;
+  --bg-card: #ffffff;
+  --text-main: #0f172a;
+  --text-muted: #64748b;
+  --primary-blue: #005bb5;
+  --primary-dark: #0f172a;
+  --accent-green: #23C48E;
+  --accent-red: #D3435C;
+  --border-color: #e2e8f0;
+}
+
 .conexion-layout {
   min-height: 100vh;
-  background-color: #f7f9fc;
+  background-color: var(--bg-main);
   display: flex;
   flex-direction: column;
   padding-bottom: 70px;
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
 }
 
 /* =========================================
    CABECERA
 ========================================= */
 .conexion-header {
-  background-color: #ffffff;
+  background-color: var(--bg-card);
   display: flex;
   justify-content: space-between;
   align-items: center;
   padding: 16px 20px;
-  border-bottom: 1px solid #e2e8f0;
+  border-bottom: 1px solid var(--border-color);
 }
 
 .conexion-logo-group {
@@ -41,7 +53,7 @@
 }
 
 .user-avatar {
-  background-color: #0f172a; /* Avatar negro/oscuro como en el diseño */
+  background-color: var(--primary-dark);
   color: white;
   width: 32px;
   height: 32px;
@@ -54,7 +66,7 @@
 }
 
 /* =========================================
-   CONTENIDO PRINCIPAL
+   CONTENIDO PRINCIPAL Y TARJETAS
 ========================================= */
 .conexion-content {
   padding: 24px 20px;
@@ -65,26 +77,28 @@
 
 .titulo-seccion {
   font-size: 24px;
-  color: #0f172a;
+  color: var(--text-main);
   margin: 0 0 20px 0;
   font-weight: 700;
 }
 
-/* =========================================
-   TARJETA 1: ESTADO PRINCIPAL
-========================================= */
-.card-estado-principal {
-  background-color: #ffffff;
+.card-estado-principal, .tarjeta-datos {
+  background-color: var(--bg-card);
   border-radius: 8px;
-  border: 1px solid #e2e8f0;
-  padding: 30px 20px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
+  border: 1px solid var(--border-color);
+  padding: 24px 20px;
   margin-bottom: 16px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.02);
 }
 
+.card-estado-principal {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 30px 20px;
+}
+
+/* Anillos concéntricos del estado */
 .anillos-concentricos {
   width: 140px;
   height: 140px;
@@ -100,18 +114,18 @@
 .anillos-concentricos::before {
   content: '';
   position: absolute;
-  width: 200px;
-  height: 200px;
+  width: 180px;
+  height: 180px;
   border-radius: 50%;
   border: 1px solid #f8fafc;
   z-index: 0;
 }
 
 .caja-estado {
-  width: 80px;
-  height: 80px;
-  background-color: #ecfdf5; /* Fondo verde muy claro */
-  border: 2px solid #d1fae5;
+  width: 90px;
+  height: 90px;
+  background-color: #f8fafc;
+  border: 2px solid var(--border-color);
   border-radius: 12px;
   display: flex;
   flex-direction: column;
@@ -121,25 +135,12 @@
   z-index: 1;
 }
 
-.punto-verde-pulso {
-  width: 14px;
-  height: 14px;
-  background-color: #10b981; /* Verde esmeralda */
-  border-radius: 50%;
-  box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7);
-  animation: pulso-conexion 2s infinite;
-}
-
-@keyframes pulso-conexion {
-  0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7); }
-  70% { transform: scale(1); box-shadow: 0 0 0 8px rgba(16, 185, 129, 0); }
-  100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
-}
-
 .texto-activo {
   font-size: 11px;
   font-weight: 700;
-  color: #047857;
+  color: var(--text-main);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
 }
 
 .info-estado {
@@ -148,109 +149,29 @@
 
 .info-estado h3 {
   font-size: 20px;
-  color: #0f172a;
+  color: var(--text-main);
   margin: 0 0 8px 0;
   font-weight: 700;
 }
 
 .info-estado p {
   font-size: 14px;
-  color: #64748b;
+  color: var(--text-muted);
   margin: 0;
 }
 
 /* =========================================
-   TARJETAS SECUNDARIAS GLOBALES
-========================================= */
-.tarjeta-datos {
-  background-color: #ffffff;
-  border-radius: 8px;
-  border: 1px solid #e2e8f0;
-  padding: 20px;
-  margin-bottom: 16px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.02);
-}
-
-.tarjeta-cabecera {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 12px;
-}
-
-.etiqueta-gris {
-  font-size: 11px;
-  font-weight: 700;
-  color: #64748b;
-  letter-spacing: 0.8px;
-  text-transform: uppercase;
-}
-
-.icono-pequeno {
-  width: 16px;
-  height: 16px;
-}
-
-/* =========================================
-   TARJETA 2: LATIDO DE RED
-========================================= */
-.latido-texto {
-  display: flex;
-  align-items: baseline;
-  gap: 4px;
-  margin-bottom: 4px;
-}
-
-.tiempo-destaque {
-  font-size: 28px;
-  font-weight: 700;
-  color: #0073cc;
-}
-
-.tiempo-sufijo {
-  font-size: 16px;
-  color: #64748b;
-}
-
-.subtexto-gris {
-  font-size: 13px;
-  color: #475569;
-  margin: 0 0 16px 0;
-}
-
-.grafico-barras {
-  display: flex;
-  align-items: flex-end;
-  justify-content: space-between;
-  height: 40px;
-  background-color: #f8fafc;
-  padding: 8px;
-  border-radius: 4px;
-  gap: 4px;
-}
-
-.barra {
-  flex: 1;
-  border-radius: 2px 2px 0 0;
-}
-
-.barra-baja { height: 40%; background-color: #8bb4d1; }
-.barra-media { height: 60%; background-color: #8bb4d1; }
-.barra-alta { height: 100%; background-color: #005bb5; }
-.barra-maxima { height: 120%; background-color: #005bb5; margin-top: -8px; } /* Simula un pico fuera de la caja */
-
-/* =========================================
-   TARJETA 3: CALIDAD DE SEÑAL
+   TARJETA: CALIDAD DE SEÑAL
 ========================================= */
 .tarjeta-senal {
-  background-color: #005bb5;
+  background-color: var(--primary-blue);
   border-radius: 8px;
   padding: 20px;
   margin-bottom: 16px;
   display: flex;
   justify-content: space-between;
   align-items: flex-end;
-  box-shadow: 0 4px 6px rgba(0, 91, 181, 0.2);
+  box-shadow: 0 4px 12px rgba(0, 91, 181, 0.15);
 }
 
 .etiqueta-blanca-transparente {
@@ -278,109 +199,49 @@
 .senal-icono svg {
   width: 100%;
   height: 100%;
-  opacity: 0.9;
+  transition: opacity 0.3s ease;
 }
 
 /* =========================================
-   TARJETA 4: DETALLES DE TRANSMISIÓN
+   NUEVO: PANEL DE VINCULACIÓN BLUETOOTH
 ========================================= */
-.tarjeta-detalles {
-  background-color: #ffffff;
-  border-radius: 8px;
-  border: 1px solid #e2e8f0;
+.tarjeta-cabecera {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
   margin-bottom: 16px;
-  overflow: hidden; /* Mantiene los bordes redondeados limpios */
 }
 
-.detalles-cabecera {
-  background-color: #f1f5f9;
-  padding: 12px 20px;
-  border-bottom: 1px solid #e2e8f0;
+.etiqueta-gris {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--text-muted);
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
 }
 
-.detalles-lista {
-  display: flex;
-  flex-direction: column;
+.icono-pequeno {
+  width: 16px;
+  height: 16px;
 }
 
-.detalle-item {
-  display: flex;
-  flex-direction: column;
-  padding: 16px 20px;
-  border-bottom: 1px solid #e2e8f0;
-  gap: 4px;
-}
-
-.detalle-item.sin-borde {
-  border-bottom: none;
-}
-
-.detalle-label {
-  font-size: 12px;
-  font-weight: 600;
-  color: #64748b;
-}
-
-.detalle-valor {
-  font-size: 15px;
-  font-weight: 600;
-  color: #0f172a;
-}
-
-.enlace-azul {
-  color: #0073cc;
-}
-
-/* =========================================
-   FORMULARIO CONFIGURACIÓN DE RED (NUEVO)
-========================================= */
-.tarjeta-config-red {
-  display: flex;
-  flex-direction: column;
-}
-
-.formulario-red {
+.panel-bluetooth {
   display: flex;
   flex-direction: column;
   gap: 16px;
   width: 100%;
-  margin-top: 8px;
 }
 
-.grupo-input {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-}
-
-.grupo-input label {
-  font-size: 13px;
-  font-weight: 600;
-  color: #475569;
-}
-
-.grupo-input input {
-  width: 100%;
-  padding: 12px 14px;
+.descripcion-ble {
   font-size: 14px;
-  border: 1px solid #e2e8f0;
-  border-radius: 6px;
-  background-color: #f8fafc;
-  color: #0f172a;
-  outline: none;
-  transition: all 0.2s ease;
+  color: #475569;
+  line-height: 1.5;
+  margin: 0;
 }
 
-/* Estado de enfoque (focus) del input */
-.grupo-input input:focus {
-  border-color: #0073cc;
-  background-color: #ffffff;
-  box-shadow: 0 0 0 3px rgba(0, 115, 204, 0.1);
-}
-
-/* Botón de envío */
+/* Botón de Escaneo Bluetooth */
 .btn-enviar-red {
-  background-color: #0f172a; /* Mismo tono oscuro del avatar para balancear el diseño */
+  background-color: var(--primary-dark);
   color: #ffffff;
   font-size: 14px;
   font-weight: 700;
@@ -389,13 +250,119 @@
   border-radius: 6px;
   cursor: pointer;
   transition: background-color 0.2s ease, transform 0.1s ease;
-  margin-top: 4px;
+  width: 100%;
 }
 
-.btn-enviar-red:hover {
+.btn-enviar-red:hover:not(:disabled) {
   background-color: #1e293b;
 }
 
-.btn-enviar-red:active {
-  transform: scale(0.98);
+.btn-enviar-red:active:not(:disabled) {
+  transform: scale(0.99);
+}
+
+.btn-enviar-red:disabled {
+  background-color: #94a3b8;
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+
+/* Caja de éxito de dispositivo seleccionado */
+.dispositivo-vinculado {
+  background-color: #f0fdf4;
+  border: 1px solid #bbf7d0;
+  border-radius: 6px;
+  padding: 14px 16px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  animation: entradaSuave 0.3s ease-out;
+}
+
+.icono-check {
+  background-color: var(--accent-green);
+  color: white;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  font-size: 12px;
+  flex-shrink: 0;
+}
+
+.dispositivo-vinculado h4 {
+  margin: 0 0 2px 0;
+  color: #166534;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.dispositivo-vinculado p {
+  margin: 0;
+  color: #14532d;
+  font-size: 13px;
+  font-family: monospace;
+}
+
+/* Mensajes de error */
+.error-mensaje-ble {
+  color: var(--accent-red);
+  font-size: 13px;
+  margin: 0;
+  font-weight: 600;
+  background-color: #fef2f2;
+  border-left: 3px solid var(--accent-red);
+  padding: 8px 12px;
+  border-radius: 0 4px 4px 0;
+}
+
+@keyframes entradaSuave {
+  from { opacity: 0; transform: translateY(4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* =========================================
+   BARRA DE NAVEGACIÓN INFERIOR (PWA)
+========================================= */
+.bottom-nav {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 64px;
+  background-color: var(--bg-card);
+  border-top: 1px solid var(--border-color);
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  z-index: 100;
+}
+
+.nav-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  gap: 4px;
+  font-size: 11px;
+  font-weight: 500;
+  width: 25%;
+  height: 100%;
+}
+
+.nav-item svg {
+  width: 20px;
+  height: 20px;
+}
+
+.nav-item.active {
+  color: var(--primary-blue);
+  font-weight: 700;
 }
