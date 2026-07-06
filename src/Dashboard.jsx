@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from 'react'; // Agregamos el control de estados y efectos
+import React, { useState, useEffect } from 'react'; 
 import { useNavigate } from 'react-router-dom';
-import { obtenerPh, obtenerTds } from './datosph'; // Con un solo punto (.)
+import { obtenerPh, obtenerTds } from './datosph'; 
 import './Dashboard.css';
 
 function Dashboard() {
@@ -12,50 +12,67 @@ function Dashboard() {
   const [ph, setPh] = useState(7.5);
   const [tds, setTds] = useState(3);
 
-  // Dentro de Dashboard.jsx
-const irARegistros = () => {
-  navigate('/Registros', { 
-    state: { ph: ph, tds: tds } // Enviamos las lecturas actuales
+  // 💾 LOCALSTORAGE: Estado inicial del Modo Oscuro
+  const [modoOscuro, setModoOscuro] = useState(() => {
+    const temaGuardado = localStorage.getItem('modo_oscuro');
+    return temaGuardado !== null ? JSON.parse(temaGuardado) : false;
   });
-};
 
-    
+  // 🌓 EFFECT PARA EL MODO OSCURO: Sincroniza la clase CSS global en el body
+  useEffect(() => {
+    if (modoOscuro) {
+      document.body.classList.add('dark-theme');
+    } else {
+      document.body.classList.remove('dark-theme');
+    }
+  }, [modoOscuro]);
 
-  // NUEVO: Historial para dibujar la ola (10 puntos de datos)
+  // Alternar el modo oscuro y guardarlo localmente
+  const switchModoOscuro = () => {
+    setModoOscuro((prev) => {
+      const nuevoEstado = !prev;
+      localStorage.setItem('modo_oscuro', JSON.stringify(nuevoEstado));
+      return nuevoEstado;
+    });
+  };
+
+  const irARegistros = () => {
+    navigate('/Registros', { 
+      state: { ph: ph, tds: tds } 
+    });
+  };
+
+  // Historial para dibujar la ola (10 puntos de datos)
   const [historialPh, setHistorialPh] = useState(Array(10).fill(7.0));
   const [historialTds, setHistorialTds] = useState(Array(10).fill(5));
+
   // =========================================================
   // EFECTO DE CONEXIÓN: Consulta a datosph.js cada 5 segundos
   // =========================================================
   useEffect(() => {
     const actualizarLecturas = async () => {
-      const valorPh = await obtenerPh();  // Pregunta al archivo externo por el pH
-      const valorTds = await obtenerTds(); // Pregunta al archivo externo por el TDS
-      const valorPhPRUEBAS = 7.42;
-      const valorTdsPRUEBAS = 520;
-      setPh(valorPh); // Actualiza el estado con el valor real del pH
+      const valorPh = await obtenerPh();  
+      const valorTds = await obtenerTds(); 
+      
+      setPh(valorPh); 
       setTds(valorTds);
-      // NUEVO: Actualizamos el historial desplazando los datos a la izquierda
+
       setHistorialPh(historialAnterior => {
-        // Tomamos todos los elementos menos el primero (slice(1)) y agregamos el nuevo al final
         return [...historialAnterior.slice(1), valorPh];
       });
       setHistorialTds(historialAnterior => {
-        // Tomamos todos los elementos menos el primero (slice(1)) y agregamos el nuevo al final
         return [...historialAnterior.slice(1), valorTds];
       });
     };
 
-    actualizarLecturas(); // Primera carga inmediata al abrir la página
-    const intervalo = setInterval(actualizarLecturas, 5000); // Se repite cada 5 segundos
+    actualizarLecturas(); 
+    const intervalo = setInterval(actualizarLecturas, 5000); 
 
-    return () => clearInterval(intervalo); // Limpieza del temporizador al salir de la pantalla
+    return () => clearInterval(intervalo); 
   }, []);
 
-  // Validación de rangos cruzados para cambiar alertas de color de forma automática
   const phSaludable = ph >= 5.5 && ph <= 7.3 && tds < 1000;
 
-  // NUEVA VERSIÓN: Función universal para generar curvas SVG dinámicas
   const generarCurvaSVG = (datos, minVal, maxVal) => {
     const rango = maxVal - minVal;
     let path = "M0,80 "; 
@@ -85,62 +102,62 @@ const irARegistros = () => {
     return path;
   };
 
-  
   return (
     <div className="dashboard-layout">
       
       {/* Barra superior */}
-      <header className="dashboard-header">
-        <div className="dashboard-logo-group">
-          <svg viewBox="0 0 24 24" fill="none" stroke="#0073cc" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="logo-icon">
-            <path d="M12 22a7 7 0 0 0 7-7c0-2-1-3.9-3-5.5s-3.5-4-4-6.5c-.5 2.5-2 4.9-4 6.5C6 11.1 5 13 5 15a7 7 0 0 0 7 7z"></path>
-          </svg>
-          <h2>PureCode</h2>
-        </div>
-        <div className="dashboard-user-actions">
-          <button className="btn-bell">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
-              <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
-            </svg>
-          </button>
-          <div className="user-avatar" onClick={() => navigate('/perfil')} style={{ cursor: 'pointer' }}>
-            M
-          </div>
-        </div>
-      </header>
+      {/* Barra superior */}
+<header className="dashboard-header">
+  <div className="dashboard-logo-group">
+    <svg viewBox="0 0 24 24" fill="none" stroke="#0073cc" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="logo-icon">
+      <path d="M12 22a7 7 0 0 0 7-7c0-2-1-3.9-3-5.5s-3.5-4-4-6.5c-.5 2.5-2 4.9-4 6.5C6 11.1 5 13 5 15a7 7 0 0 0 7 7z"></path>
+    </svg>
+    <h2>PureCode</h2>
+  </div>
+  
+  <div className="dashboard-user-actions">
+    {/* 🌓 INTERRUPTOR DE MODO OSCURO CON SVG CORREGIDOS */}
+    <button 
+      className="btn-theme-toggle" 
+      onClick={switchModoOscuro}
+      title={modoOscuro ? "Cambiar a Modo Claro" : "Cambiar a Modo Oscuro"}
+    >
+      {modoOscuro ? (
+        /* Icono de Sol - Forzado a color blanco en modo oscuro */
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#ffffff" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+          <circle cx="12" cy="12" r="5"></circle>
+          <line x1="12" y1="1" x2="12" y2="3"></line>
+          <line x1="12" y1="21" x2="12" y2="23"></line>
+          <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+          <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+          <line x1="1" y1="12" x2="3" y2="12"></line>
+          <line x1="21" y1="12" x2="23" y2="12"></line>
+          <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+          <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+        </svg>
+      ) : (
+        /* Icono de Luna - Forzado al azul de tu paleta en modo claro */
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#0073cc" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+        </svg>
+      )}
+    </button>
+
+    <div className="user-avatar" onClick={() => navigate('/perfil')} style={{ cursor: 'pointer' }}>
+      M
+    </div>
+  </div>
+</header>
 
       {/* Contenido principal */}
       <main className="dashboard-content">
         <br />
-        {/* Título y Estado */}
         <section className="overview-header">
           <h1>Resumen Ambiental</h1>
           <div className="status-indicator">
             <span className="dot pulse"></span>
             <p>Actualizando en vivo desde ESP32</p>
           </div>
-        </section>
-
-        {/* Botones de acción */}
-        <section className="action-buttons">
-          <button className="btn-primary">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M21 2v6h-6"></path>
-              <path d="M3 12a9 9 0 0 1 15-6.7L21 8"></path>
-              <path d="M3 22v-6h6"></path>
-              <path d="M21 12a9 9 0 0 1-15 6.7L3 16"></path>
-            </svg>
-            FORZAR ACTUALIZACIÓN
-          </button>
-          <button className="btn-secondary" onClick={() => navigate('/registros')}>
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-              <polyline points="7 10 12 15 17 10"></polyline>
-              <line x1="12" y1="15" x2="12" y2="3"></line>
-            </svg>
-            CREAR REGISTRO
-          </button>
         </section>
 
         {/* Tarjetas de Datos */}
@@ -155,7 +172,6 @@ const irARegistros = () => {
                 </svg>
                 <span>NIVEL DE ACIDEZ (pH)</span>
               </div>
-              {/* Cambia dinámicamente de color según los datos en tiempo real */}
               <span className={`badge ${ph >= 5.5 && ph <= 7.3 ? 'badge-green' : 'badge-red'}`}>
                 {ph >= 5.5 && ph <= 7.3 ? 'SALUDABLE' : 'ALERTA'}
               </span>
@@ -163,7 +179,6 @@ const irARegistros = () => {
             
             <div className="card-body">
               <div className="main-metric">
-                {/* Muestra el pH en vivo con dos decimales */}
                 <span className="value">{ph.toFixed(2)}</span>
                 <span className="unit">pH</span>
               </div>
@@ -195,7 +210,7 @@ const irARegistros = () => {
             </div>
           </article>
 
-          {/* Tarjeta de Turbidez (Ahora enlazada al TDS real de tu blynk) */}
+          {/* Tarjeta de Turbidez */}
           <article className="data-card">
             <div className="card-header">
               <div className="card-title">
@@ -211,7 +226,6 @@ const irARegistros = () => {
             
             <div className="card-body">
               <div className="main-metric">
-                {/* Muestra el valor entero real del TDS */}
                 <span className="value">{tds}</span>
                 <span className="unit">ppm</span>
               </div>
@@ -243,7 +257,7 @@ const irARegistros = () => {
             </div>
           </article>
 
-          {/* Tarjeta Innovación: Índice PureCode */}
+          {/* Tarjeta Innovación */}
           <article className="data-card highlight-card">
             <div className="card-header">
               <div className="card-title">

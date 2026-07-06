@@ -11,7 +11,6 @@ function Registros() {
   const location = useLocation();
 
   // Extraemos el ph y tds reales que vienen del Dashboard.
-  // Si por alguna razón entran directo sin pasar por el Dashboard, usa los valores de respaldo (7.4 y 2.1)
   const phReal = location.state?.ph ?? 0;
   const tdsReal = location.state?.tds ?? 0;
 
@@ -21,18 +20,43 @@ function Registros() {
   const [pasoFlujo, setPasoFlujo] = useState('IDLE'); // 'IDLE', 'INPUT_NAME', 'COUNTDOWN', 'SHOW_RESULTS'
   const [nombreRegistro, setNombreRegistro] = useState('');
   const [contador, setContador] = useState(15);
+  const [usuarioId, setUsuarioId] = useState(null);
 
-    const [usuarioId, setUsuarioId] = useState(null);
-  
+  // 💾 LOCALSTORAGE: Estado inicial de las notificaciones leyendo el disco local
+  const [notificacionesActivas, setNotificacionesActivas] = useState(() => {
+    const guardado = localStorage.getItem('notificaciones_activas');
+    // Si no existe un registro previo, por defecto las dejamos activadas ('true')
+    return guardado !== null ? JSON.parse(guardado) : true;
+  });
+
+  // 🔔 ESTADO PARA LA NOTIFICACIÓN ESTILO TELÉFONO (TOP TOAST)
+  const [notificacionPush, setNotificacionPush] = useState({
+    mostrar: false,
+    titulo: '',
+    mensaje: ''
+  });
+
+  // =========================================================
+  // 🌓 SINCRONIZAR MODO OSCURO GLOBAL
+  // =========================================================
+  useEffect(() => {
+    const temaGuardado = localStorage.getItem('modo_oscuro');
+    if (temaGuardado !== null && JSON.parse(temaGuardado)) {
+      document.body.classList.add('dark-theme');
+    } else {
+      document.body.classList.remove('dark-theme');
+    }
+  }, []); // Se ejecuta únicamente al entrar a la pantalla
+
   useEffect(() => {
     // Al cargar la pantalla, Firebase nos dice qué usuario tiene la sesión activa
     const desuscribir = onAuthStateChanged(auth, (user) => {
       if (user) {
-        setUsuarioId(user.uid); // Guardamos su ID único (ej: 7WcM9PDi6KbvP1a52LMuMEyuSRy2)
+        setUsuarioId(user.uid); 
       } else {
         setUsuarioId(null);
         alert('Debes iniciar sesión para ver tus registros.');
-        navigate('/login'); // Te manda al login si no hay nadie conectado
+        navigate('/login'); 
       }
     });
 
@@ -40,14 +64,11 @@ function Registros() {
   }, [navigate]);
 
   // LEER REGISTROS DESDE FIREBASE
- 
   useEffect(() => {
-    // Solo intentamos leer si ya tenemos el ID del usuario
     if (!usuarioId) return;
 
     const obtenerMediciones = async () => {
       try {
-        // Creamos la consulta ordenada por fecha (de la más reciente a la más antigua)
         const q = query(
           collection(db, "RegistrarUsuarios", usuarioId, "mediciones"),
           orderBy("fecha", "desc")
@@ -59,7 +80,6 @@ function Registros() {
         querySnapshot.forEach((doc) => {
           const datos = doc.data();
           
-          // Convertimos el Timestamp de Firebase a un formato legible de fecha (DD/MM/AAAA)
           const fechaFormateada = datos.fecha 
             ? datos.fecha.toDate().toLocaleDateString('es-MX') 
             : new Date().toLocaleDateString('es-MX');
@@ -68,12 +88,11 @@ function Registros() {
             id: doc.id,
             nombre: datos.nombre,
             ph: datos.ph,
-            turbidez: datos.tds, // Lo asignamos a 'turbidez' para que coincida con tu HTML
+            turbidez: datos.tds, 
             fecha: fechaFormateada
           });
         });
 
-        // Actualizamos el estado para que se pinte en tu tabla
         setListaRegistros(registrosFirebase);
 
       } catch (error) {
@@ -83,7 +102,6 @@ function Registros() {
 
     obtenerMediciones();
   }, [usuarioId, pasoFlujo]); 
-  // Ponemos 'pasoFlujo' aquí para que cuando pase a 'IDLE' (justo después de guardar), la tabla se vuelva a actualizar sola.
 
   // Manejo del temporizador de 15 segundos
   useEffect(() => {
@@ -99,10 +117,19 @@ function Registros() {
     return () => clearInterval(temporizador);
   }, [pasoFlujo, contador]);
 
+  // Alternar el estado de las notificaciones y guardarlo en el almacenamiento local
+  const switchNotificaciones = () => {
+    setNotificacionesActivas((prev) => {
+      const nuevoEstado = !prev;
+      localStorage.setItem('notificaciones_activas', JSON.stringify(nuevoEstado));
+      return nuevoEstado;
+    });
+  };
+
   // Funciones de control del flujo
   const iniciarFlujo = () => {
     setNombreRegistro('');
-    setContador(5);
+    setContador(15); 
     setPasoFlujo('INPUT_NAME');
   };
 
@@ -115,7 +142,6 @@ function Registros() {
   };
 
   const guardarEnHistorial = async () => {
-    // 1. Verificamos que tengamos el ID del usuario que inició sesión
     if (!usuarioId) {
       alert('Error: No se encontró un usuario activo para guardar el registro.');
       return;
@@ -127,28 +153,32 @@ function Registros() {
     }
 
     try {
-      // 2. Creamos la referencia exacta a: RegistrarUsuarios -> ID_Usuario -> mediciones
       const subcoleccionRef = collection(db, "RegistrarUsuarios", usuarioId, "mediciones");
 
-      // 3. Enviamos el documento con los datos decimales y la fecha del servidor
       await addDoc(subcoleccionRef, {
         nombre: nombreRegistro,
         ph: parseFloat(phReal),
-        tds: parseFloat(tdsReal), // Tu código lo llama tdsReal, ¡lo guardamos aquí!
-        fecha: serverTimestamp()  // Firebase le pone la fecha exacta de su servidor
+        tds: parseFloat(tdsReal), 
+        fecha: serverTimestamp()  
       });
 
-      // 4. Cerramos el modal de éxito regresando al estado de reposo
       setPasoFlujo('IDLE');
-      setNombreRegistro('');
       
-      // ✨ CAMBIO: Activamos nuestra notificación bonita hecha en casa
-      setNotificacion({ mostrar: true, mensaje: '¡Medición guardada con éxito!' });
+      // 🚀 EVALUACIÓN DE REGLA LOCALSTORAGE: Solo dispara la notificación si el usuario las tiene activas
+      if (notificacionesActivas) {
+        setNotificacionPush({
+          mostrar: true,
+          titulo: 'PureCode • Sistema',
+          mensaje: `Se ha guardado el registro "${nombreRegistro}". Da click aquí para verlo.`
+        });
 
-      // La ocultamos automáticamente en 3 segundos (3000 ms)
-      setTimeout(() => {
-        setNotificacion({ mostrar: false, mensaje: '' });
-      }, 3000);
+        // Auto ocultar tras 5 segundos
+        setTimeout(() => {
+          setNotificacionPush(prev => ({ ...prev, mostrar: false }));
+        }, 5000);
+      }
+
+      setNombreRegistro('');
 
     } catch (error) {
       console.error("Error al guardar en Firebase:", error);
@@ -156,8 +186,13 @@ function Registros() {
     }
   };
 
-    // Estado para controlar la notificación personalizada
-  const [notificacion, setNotificacion] = useState({ mostrar: false, mensaje: '' });
+  const manejarClickNotificacion = () => {
+    setNotificacionPush({ mostrar: false, titulo: '', mensaje: '' });
+    const seccionTabla = document.querySelector('.seccion-tabla-historial');
+    if (seccionTabla) {
+      seccionTabla.scrollIntoView({ behavior: 'smooth' });
+    }
+  };
 
   const cerrarFlujo = () => {
     setPasoFlujo('IDLE');
@@ -166,6 +201,25 @@ function Registros() {
   return (
     <div className="registros-layout">
       
+      {/* 📱 NOTIFICACIÓN DE TELÉFONO */}
+      <div 
+        className={`notificacion-push-superior ${notificacionPush.mostrar ? 'activa' : ''}`}
+        onClick={manejarClickNotificacion}
+      >
+        <div className="push-linea-arrastrar"></div>
+        <div className="push-contenido">
+          <div className="push-icono-app">
+            <svg viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.5">
+              <path d="M12 22a7 7 0 0 0 7-7c0-2-1-3.9-3-5.5s-3.5-4-4-6.5c-.5 2.5-2 4.9-4 6.5C6 11.1 5 13 5 15a7 7 0 0 0 7 7z"></path>
+            </svg>
+          </div>
+          <div className="push-texto">
+            <h4 className="push-titulo">{notificacionPush.titulo}</h4>
+            <p className="push-mensaje">{notificacionPush.mensaje}</p>
+          </div>
+        </div>
+      </div>
+
       {/* Barra superior */}
       <header className="registros-header">
         <div className="registros-logo-group">
@@ -174,25 +228,40 @@ function Registros() {
           </svg>
           <h2>PureCode</h2>
         </div>
+        
         <div className="registros-user-actions">
-          <button className="btn-bell">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
-              <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
-            </svg>
+          {/* 🔔 BOTÓN DE NOTIFICACIONES MODIFICADO CON LÓGICA LOCALSTORAGE */}
+          <button 
+            className={`btn-bell ${!notificacionesActivas ? 'desactivado' : ''}`} 
+            onClick={switchNotificaciones}
+            title={notificacionesActivas ? "Desactivar Notificaciones" : "Activar Notificaciones"}
+          >
+            {notificacionesActivas ? (
+              /* Icono Campana Activa */
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
+                <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
+              </svg>
+            ) : (
+              /* Icono Campana Silenciada / Desactivada (Bell Off) */
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
+                <path d="M18.63 13A17.89 17.89 0 0 1 18 8"></path>
+                <path d="M6.26 6.26A5.86 5.86 0 0 0 6 8c0 7-3 9-3 9h14"></path>
+                <path d="M18 8a6 6 0 0 0-9.33-5"></path>
+                <line x1="1" y1="1" x2="23" y2="23"></line>
+              </svg>
+            )}
           </button>
+          
           <div className="user-avatar" onClick={() => navigate('/perfil')} style={{ cursor: 'pointer' }}>
             M
           </div>
         </div>
       </header>
 
-      
-
       {/* Contenido principal */}
       <main className="registros-content">
-        
-        {/* Cabecera de la sección */}
         <section className="registros-titulo-seccion">
           <h1>Historial de Datos</h1>
           <p>Registros ambientales archivados</p>
@@ -204,7 +273,6 @@ function Registros() {
             <span className="resumen-label">pH</span>
             <div className="resumen-valor">
               <span className="numero azul">0</span>
-              
             </div>
           </div>
           <div className="tarjeta-resumen">
@@ -226,8 +294,6 @@ function Registros() {
             INICIAR NUEVO REGISTRO
           </button>
         </section>
-
-        
 
         {/* TABLA DE HISTORIAL DE DATOS REINCORPORADA */}
         <section className="seccion-tabla-historial">
@@ -269,7 +335,7 @@ function Registros() {
           <div className="texto-analisis">
             <h2>Consejos para una Medición Precisa</h2>
             <h3>Espera la estabilización (15-30 segundos):</h3>
-            <p>Cuando sumerjas los sensores en el agua, no guardes el primer dato que veas. El electrodo de vidrio del sensor de pH necesita entre 15 y 30 segundos para reaccionar químicamente y adaptarse al nuevo entorno. Espera a que los números dejen de fluctuar en la pantalla antes de registrar tu medición diaria.</p>
+            <p>Cuando sumerjas los sensores in el agua, no guardes el primer dato que veas. El electrodo de vidrio del sensor de pH necesita entre 15 y 30 segundos para reaccionar químicamente y adaptarse al nuevo entorno. Espera a que los números dejen de fluctuar en la pantalla antes de registrar tu medición diaria.</p>
             <h3>La regla de las 2 horas:</h3>
             <p>Si vas a tomar una muestra de agua en un contenedor para medirla después, asegúrate de hacer la medición dentro de las primeras 2 horas. Pasado este tiempo, el dióxido de carbono (Co2) del aire exterior comenzará a disolverse en el agua, alterando su acidez real y cambiando por completo el valor del pH. ¡Mide fresco para medir bien!</p>
           </div>
@@ -335,7 +401,7 @@ function Registros() {
                   <span className="modal-dato-valor valor-turbidez">{tdsReal} NTU</span>
                 </div>
               </div>
- 
+
               <button className="btn-modal-ok btn-bloque" onClick={guardarEnHistorial}>
                 Guardar en Historial
               </button>
@@ -351,32 +417,19 @@ function Registros() {
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
           <span>Panel</span>
         </button>
-
         <button className="nav-item" onClick={() => navigate('/conexion')}>
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12.55a11 11 0 0 1 14.08 0"></path><path d="M1.42 9a16 16 0 0 1 21.16 0"></path><path d="M8.53 16.11a6 6 0 0 1 6.95 0"></path><line x1="12" y1="20" x2="12.01" y2="20"></line></svg>
           <span>Conexión</span>
         </button>
-
         <button className="nav-item active">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><ellipse cx="12" cy="5" rx="9" ry="3"></ellipse><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"></path><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"></path></svg>
           <span>Registros</span>
         </button>
-
         <button className="nav-item" onClick={() => navigate('/perfil')}>
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
           <span>Perfil</span>
         </button>
       </nav>
-
-      {notificacion.mostrar && (
-        <div className="toast-personalizado">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="toast-icono" style={{ width: '20px', height: '20px', marginRight: '8px' }}>
-            <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
-            <polyline points="22 4 12 14.01 9 11.01"></polyline>
-          </svg>
-          <span>{notificacion.mensaje}</span>
-        </div>
-      )}
 
     </div>
   );

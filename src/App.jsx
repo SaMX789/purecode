@@ -13,26 +13,32 @@ function App() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [mostrarPassword, setMostrarPassword] = useState(false);
+  const [recordar, setRecordar] = useState(false); // <-- NUEVO: Estado para el Checkbox
   
   const [error, setError] = useState(''); // <-- Estado para manejar errores de login
-
   const [procesandoLogin, setProcesandoLogin] = useState(false);
 
   const navigate = useNavigate(); // <-- Inicializamos el hook de navegación
 
+  // NUEVO: Cargar el correo guardado al iniciar la app
+  useEffect(() => {
+    const emailGuardado = localStorage.getItem('usuarioEmail');
+    if (emailGuardado) {
+      setEmail(emailGuardado);
+      setRecordar(true); // Mantiene marcada la casilla si ya había un correo guardado
+    }
+  }, []);
+
   const manejarRestablecerPassword = async (e) => {
     e.preventDefault(); // Evita que la página se recargue por el enlace <a>
 
-    // Validamos que el campo de email no esté vacío
     if (!email) {
       alert("Por favor, ingresa tu correo electrónico en el campo superior para enviarte el enlace de restablecimiento.");
       return;
     }
 
-    // Llamamos a la función de Firebase
     const resultado = await restablecerContrasenia(email);
 
-    // Evaluamos el resultado
     if (resultado.exito) {
       alert(`Se ha enviado un enlace para restablecer tu contraseña a: ${email}`);
     } else {
@@ -55,25 +61,30 @@ function App() {
     return () => clearTimeout(timer); // Limpieza del timer al desmontar
   }, []);
 
-// 4. Función que se ejecuta al presionar "Iniciar sesión"
+  // 4. Función que se ejecuta al presionar "Iniciar sesión"
   const manejarEnvio = async (e) => {
     e.preventDefault();
 
     setProcesandoLogin(true); // Mostramos "Cargando..." en el botón
     setError(''); // Limpiamos errores previos
 
-    // Llamamos a Firebase para verificar al usuario
     const resultado = await iniciarSesion(email, password);
 
     if (resultado.exito) {
+      // NUEVO: Lógica de Recordar Usuario
+      if (recordar) {
+        localStorage.setItem('usuarioEmail', email); // Guarda el correo
+      } else {
+        localStorage.removeItem('usuarioEmail'); // Borra si se desmarcó
+      }
+
       console.log('Inicio de sesión exitoso. Redirigiendo...');
       navigate('/dashboard'); 
     } else {
-      // CAMBIO: Agregamos la validación para cuando el correo no está verificado
       if (resultado.error === 'auth/email-not-verified') {
         setError('Debes verificar tu correo electrónico antes de iniciar sesión. Revisa tu bandeja de entrada.');
       } else if (resultado.error === 'auth/invalid-credential') {
-        setError('Correo o contraseña incorrectos.'); // Ajuste de gramática sugerido
+        setError('Correo o contraseña incorrectos.'); 
       } else if (resultado.error === 'auth/user-not-found') {
          setError('No existe una cuenta con este correo.');
       } else if (resultado.error === 'auth/too-many-requests') {
@@ -86,22 +97,18 @@ function App() {
     setProcesandoLogin(false);
   };
 
-  // 5. Condición inicial: Si está cargando, mostramos la gotita y detenemos el renderizado del resto
   if (cargando) {
     return <Splash />;
   }
 
-  // 6. Si ya pasaron los 3 segundos, se muestra el Login con su lógica
   return (
     <div className="contenedor-principal">
       
-      {/* Encabezado (Logo y Título de la app) */}
       <header className="encabezado-marca">
         <img src="/icono.png" alt="Logo PureCode" className="logo" />
         <h1 className="titulo-marca">PureCode</h1>
       </header>
 
-      {/* Tarjeta blanca del formulario */}
       <main className="tarjeta-login">
         <h2 className="titulo-bienvenida">Bienvenido</h2>
         <p className="subtitulo">Inicia sesión para monitorear tus redes de sensores.</p>
@@ -161,12 +168,24 @@ function App() {
             </div>
           </div>
 
+          {/* NUEVO: Checkbox Recordar Usuario */}
+          <div className="contenedor-recordar">
+            <label className="checkbox-label">
+              <input 
+                type="checkbox" 
+                checked={recordar} 
+                onChange={(e) => setRecordar(e.target.checked)} 
+              />
+              <span>Recordar usuario</span>
+            </label>
+          </div>
+
           {/* Mensaje de error visible en pantalla */}
           {error && <p className="mensaje-error" style={{color: 'red', fontSize: '14px'}}>{error}</p>}
 
           {/* Botón de Enviar */}
-          <button type="submit" className="boton-enviar">
-            Iniciar sesión <span>➔</span>
+          <button type="submit" className="boton-enviar" disabled={procesandoLogin}>
+            {procesandoLogin ? 'Cargando...' : 'Iniciar sesión'} <span>➔</span>
           </button>
           
         </form>
@@ -174,15 +193,12 @@ function App() {
         <hr className="linea-divisora" />
       </main>
 
-      {/* Enlace de Registro (Fuera de la tarjeta) */}
       <div className="enlace-registro">
         ¿No tienes cuenta? <Link to="/registro">Regístrate</Link>
       </div>
 
     </div>
   );
-
-  
 }
 
 export default App;

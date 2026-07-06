@@ -366,3 +366,54 @@
   color: var(--primary-blue);
   font-weight: 700;
 }
+/* ==========================================
+   🌙 ESTILOS DE MODO OSCURO PARA CONEXIÓN
+   ========================================== */
+body.dark-theme .conexion-layout {
+  background-color: #121212;
+}
+
+body.dark-theme .conexion-header,
+body.dark-theme .bottom-nav {
+  background-color: #1c1c1e !important;
+  border-color: #2c2c2e !important;
+}
+
+body.dark-theme .conexion-header h2,
+body.dark-theme .titulo-seccion,
+body.dark-theme .info-estado h3 {
+  color: #ffffff !important;
+}
+
+body.dark-theme .info-estado p,
+body.dark-theme .descripcion-ble {
+  color: #aeaeb2 !important;
+}
+
+body.dark-theme .card-estado-principal,
+body.dark-theme .tarjeta-config-red {
+  background-color: #1c1c1e !important;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.4) !important;
+}
+
+body.dark-theme .formulario-red label {
+  color: #e5e5ea !important;
+}
+
+body.dark-theme .formulario-red input {
+  background-color: #2c2c2e !important;
+  border-color: #3a3a3c !important;
+  color: #ffffff !important;
+}
+
+body.dark-theme .formulario-red input:focus {
+  border-color: #0073cc !important;
+}
+
+body.dark-theme .nav-item {
+  color: #8e8e93;
+}
+
+body.dark-theme .nav-item.active {
+  color: #0073cc !important;
+}
