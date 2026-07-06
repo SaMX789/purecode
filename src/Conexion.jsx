@@ -16,8 +16,20 @@ function Conexion() {
 
   const [dispositivoSeleccionado, setDispositivoSeleccionado] = useState(null);
   const [buscandoBluetooth, setBuscandoBluetooth] = useState(false);
-  const [enviandoDatos, setEnviandoDatos] = useState(false); // Nuevo: Para saber si está transmitiendo
+  const [enviandoDatos, setEnviandoDatos] = useState(false); 
   const [errorBluetooth, setErrorBluetooth] = useState('');
+
+  // =========================================================
+  // 🌓 SINCRONIZAR MODO OSCURO GLOBAL
+  // =========================================================
+  useEffect(() => {
+    const temaGuardado = localStorage.getItem('modo_oscuro');
+    if (temaGuardado !== null && JSON.parse(temaGuardado)) {
+      document.body.classList.add('dark-theme');
+    } else {
+      document.body.classList.remove('dark-theme');
+    }
+  }, []); // Se ejecuta únicamente al entrar a la pantalla
 
   // =========================================================
   // LOGICA DE MONITOREO POR LA NUBE (BLYNK)
@@ -71,62 +83,52 @@ function Conexion() {
   // FUNCIÓN PARA ENVIAR LAS CREDENCIALES POR BLUETOOTH
   // =========================================================
   const enviarCredencialesPorBLE = async (e) => {
-  e.preventDefault();
-  if (!dispositivoSeleccionado) return;
+    e.preventDefault();
+    if (!dispositivoSeleccionado) return;
 
-  setEnviandoDatos(true);
+    setEnviandoDatos(true);
 
-  try {
-    // 1. Conectar al servidor GATT del ESP32
-    console.log("Conectando al servidor GATT...");
-    const server = await dispositivoSeleccionado.gatt.connect();
-    
-    // 2. Obtener el servicio principal
-    const service = await server.getPrimaryService('0000ffe0-0000-1000-8000-00805f9b34fb');
-    
-    // 3. Obtener la característica de escritura
-    const characteristic = await service.getCharacteristic('0000ffe1-0000-1000-8000-00805f9b34fb');
-
-    // 4. Convertir texto a bytes
-    const datosAEnviar = `${ssid},${password}`;
-    const encoder = new TextEncoder();
-    const dataBuffer = encoder.encode(datosAEnviar);
-
-    // 5. Inyectar los datos
-    console.log("Escribiendo datos:", datosAEnviar);
-    await characteristic.writeValue(dataBuffer);
-    
-    alert('¡Datos enviados! El ESP32 ha apagado su Bluetooth y está validando tu Wi-Fi. Espera 6 segundos...');
-
-    // 6. Esperar 6 segundos para verificar el resultado
-    setTimeout(async () => {
-      const enLinea = await obtenerEstadoDispositivo(); // Verifica si Blynk lo ve activo
+    try {
+      console.log("Conectando al servidor GATT...");
+      const server = await dispositivoSeleccionado.gatt.connect();
       
-      if (enLinea) {
-        // --- CASO ÉXITO ---
-        alert('¡Sincronización Exitosa! El ESP32 se ha conectado a internet.');
-        setDispositivoSeleccionado(null); // Cierra el flujo limpiamente
-        setSsid('');
-        setPassword('');
-      } else {
-        // --- CASO ERROR (Tu estrategia) ---
-        alert('ERROR: El ESP32 no logró conectarse a la red. El hardware ha reiniciado su Bluetooth. Por favor, vuelve a escanear y vincularte.');
-        
-        // FORZAMOS A VINCULARSE OTRA VEZ:
-        setDispositivoSeleccionado(null); // Esto borra el vínculo viejo en React, oculta el formulario y muestra el botón de Buscar.
-        setSsid('');                      // Limpiamos los campos para el siguiente intento
-        setPassword('');
-      }
-      setEnviandoDatos(false);
-    }, 6000);
+      const service = await server.getPrimaryService('0000ffe0-0000-1000-8000-00805f9b34fb');
+      
+      const characteristic = await service.getCharacteristic('0000ffe1-0000-1000-8000-00805f9b34fb');
 
-  } catch (error) {
-    console.error('Error crítico al enviar por BLE:', error);
-    alert('Hubo un problema al transmitir los datos. Intenta reconectar el Bluetooth.');
-    setDispositivoSeleccionado(null); // Si falla la transmisión física, también reiniciamos el botón
-    setEnviandoDatos(false);
-  }
-};
+      const datosAEnviar = `${ssid},${password}`;
+      const encoder = new TextEncoder();
+      const dataBuffer = encoder.encode(datosAEnviar);
+
+      console.log("Escribiendo datos:", datosAEnviar);
+      await characteristic.writeValue(dataBuffer);
+      
+      alert('¡Datos enviados! El ESP32 ha apagado su Bluetooth y está validando tu Wi-Fi. Espera 6 segundos...');
+
+      setTimeout(async () => {
+        const enLinea = await obtenerEstadoDispositivo(); 
+        
+        if (enLinea) {
+          alert('¡Sincronización Exitosa! El ESP32 se ha conectado a internet.');
+          setDispositivoSeleccionado(null); 
+          setSsid('');
+          setPassword('');
+        } else {
+          alert('ERROR: El ESP32 no logró conectarse a la red. El hardware ha reiniciado su Bluetooth. Por favor, vuelve a escanear y vincularte.');
+          setDispositivoSeleccionado(null); 
+          setSsid('');                      
+          setPassword('');
+        }
+        setEnviandoDatos(false);
+      }, 6000);
+
+    } catch (error) {
+      console.error('Error crítico al enviar por BLE:', error);
+      alert('Hubo un problema al transmitir los datos. Intenta reconectar el Bluetooth.');
+      setDispositivoSeleccionado(null); 
+      setEnviandoDatos(false);
+    }
+  };
 
   return (
     <div className="conexion-layout">

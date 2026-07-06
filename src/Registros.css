@@ -523,3 +523,266 @@
     opacity: 1;
   }
 }
+/* Notificación Push Estilo Teléfono Móvil */
+.notificacion-push-superior {
+  position: fixed;
+  top: -120px; /* Escondida por defecto arriba del viewport */
+  left: 50%;
+  transform: translateX(-50%);
+  width: 90%;
+  max-width: 420px;
+  background: rgba(28, 28, 30, 0.96); /* Color oscuro translúcido de smartphone */
+  backdrop-filter: blur(10px);
+  border-radius: 20px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+  padding: 14px 16px;
+  z-index: 99999; /* Por encima de cualquier modal o interfaz */
+  transition: top 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); /* Rebote natural de app celular */
+  cursor: pointer;
+}
+
+/* Estado activo: cuando entra a la pantalla */
+.notificacion-push-superior.activa {
+  top: 20px;
+}
+
+/* Indicador de barra gris para cerrar (típica de notificaciones móviles) */
+.push-linea-arrastrar {
+  width: 36px;
+  height: 4px;
+  background-color: rgba(255, 255, 255, 0.25);
+  border-radius: 2px;
+  margin: 0 auto 8px auto;
+}
+
+.push-contenido {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+/* Icono redondo de la App */
+.push-icono-app {
+  width: 36px;
+  height: 36px;
+  background: #0073cc;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.push-icono-app svg {
+  width: 18px;
+  height: 18px;
+}
+
+.push-texto {
+  flex-grow: 1;
+}
+
+.push-titulo {
+  color: #ffffff;
+  margin: 0 0 2px 0;
+  font-size: 14px;
+  font-weight: 600;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+}
+
+.push-mensaje {
+  color: #d1d1d6;
+  margin: 0;
+  font-size: 12.5px;
+  line-height: 1.4;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+}
+/* Estilo base para el botón de la campana */
+.btn-bell {
+  background: none;
+  border: none;
+  color: #333333; /* O tu color por defecto de iconos */
+  cursor: pointer;
+  padding: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: color 0.3s ease, transform 0.2s ease;
+}
+
+/* Efecto hover interactivo */
+.btn-bell:hover {
+  transform: scale(1.05);
+}
+
+/* 🌙 Estado cuando las notificaciones están APAGADAS por LocalStorage */
+.btn-bell.desactivado {
+  color: #8e8e93 !important; /* Gris de sistema deshabilitado */
+  opacity: 0.6;
+}
+/* ==========================================
+   🌙 ESTILOS DE MODO OSCURO PARA REGISTROS
+   ========================================== */
+body.dark-theme .registros-layout {
+  background-color: #121212;
+}
+
+body.dark-theme .registros-header,
+body.dark-theme .bottom-nav {
+  background-color: #1c1c1e !important;
+  border-color: #2c2c2e !important;
+}
+
+body.dark-theme .registros-header h2,
+body.dark-theme .registros-titulo-seccion h1,
+body.dark-theme .seccion-tabla-historial h3,
+body.dark-theme .texto-analisis h2,
+body.dark-theme .texto-analisis h3 {
+  color: #ffffff !important;
+}
+
+body.dark-theme .registros-titulo-seccion p,
+body.dark-theme .texto-analisis p,
+body.dark-theme .resumen-label {
+  color: #aeaeb2 !important;
+}
+
+body.dark-theme .tarjeta-resumen,
+body.dark-theme .tarjeta-analisis,
+body.dark-theme .modal-tarjeta {
+  background-color: #1c1c1e !important;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.5) !important;
+}
+
+/* Tabla en modo oscuro */
+body.dark-theme .tabla-datos th {
+  background-color: #2c2c2e !important;
+  color: #e5e5ea !important;
+}
+
+body.dark-theme .tabla-datos td {
+  border-bottom-color: #2c2c2e !important;
+  color: #e5e5ea !important;
+}
+
+body.dark-theme .tabla-datos tr:hover {
+  background-color: #2c2c2e !important;
+}
+
+/* Inputs y modales */
+body.dark-theme .modal-input {
+  background-color: #2c2c2e !important;
+  border-color: #3a3a3c !important;
+  color: #ffffff !important;
+}
+
+body.dark-theme .modal-fila-dato {
+  border-bottom-color: #2c2c2e !important;
+}
+
+body.dark-theme .modal-dato-label {
+  color: #aeaeb2 !important;
+}
+
+body.dark-theme .nav-item {
+  color: #8e8e93;
+}
+
+body.dark-theme .nav-item.active {
+  color: #0073cc !important;
+}
+/* ==========================================
+   🌙 SOLUCIÓN MODO OSCURO PARA TABLA Y CONTENIDOS
+   ========================================== */
+
+/* Cuando NO está activo el modo oscuro (Tema Claro Forzado) */
+body:not(.dark-theme) .tabla-datos td {
+  color: #2c2c2e !important; /* Fuerza texto oscuro en fondo claro */
+}
+body:not(.dark-theme) .tabla-datos tr {
+  background-color: #ffffff !important;
+}
+
+/* Cuando SÍ está activo el modo oscuro (Tema Oscuro Forzado) */
+body.dark-theme .registros-layout {
+  background-color: #121212 !important;
+}
+
+body.dark-theme .registros-header,
+body.dark-theme .bottom-nav {
+  background-color: #1c1c1e !important;
+  border-color: #2c2c2e !important;
+}
+
+body.dark-theme .registros-header h2,
+body.dark-theme .registros-titulo-seccion h1,
+body.dark-theme .seccion-tabla-historial h3,
+body.dark-theme .texto-analisis h2,
+body.dark-theme .texto-analisis h3 {
+  color: #ffffff !important;
+}
+
+body.dark-theme .registros-titulo-seccion p,
+body.dark-theme .texto-analisis p,
+body.dark-theme .resumen-label {
+  color: #aeaeb2 !important;
+}
+
+body.dark-theme .tarjeta-resumen,
+body.dark-theme .tarjeta-analisis,
+body.dark-theme .modal-tarjeta {
+  background-color: #1c1c1e !important;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.5) !important;
+}
+
+/* Ajustes críticos para la Tabla en Modo Oscuro */
+body.dark-theme .seccion-tabla-historial {
+  background-color: #121212 !important;
+}
+
+body.dark-theme .tabla-contenedor {
+  background-color: #1c1c1e !important;
+  border: 1px solid #2c2c2e !important;
+  border-radius: 8px;
+}
+
+body.dark-theme .tabla-datos th {
+  background-color: #2c2c2e !important;
+  color: #ffffff !important;
+}
+
+body.dark-theme .tabla-datos tr {
+  background-color: #1c1c1e !important;
+}
+
+body.dark-theme .tabla-datos td {
+  border-bottom: 1px solid #2c2c2e !important;
+  color: #ffffff !important; /* Fuerza el texto a blanco puro sobre el fondo oscuro */
+}
+
+body.dark-theme .tabla-datos tr:hover {
+  background-color: #2c2c2e !important;
+}
+
+/* Inputs y modales */
+body.dark-theme .modal-input {
+  background-color: #2c2c2e !important;
+  border-color: #3a3a3c !important;
+  color: #ffffff !important;
+}
+
+body.dark-theme .modal-fila-dato {
+  border-bottom-color: #2c2c2e !important;
+}
+
+body.dark-theme .modal-dato-label {
+  color: #aeaeb2 !important;
+}
+
+body.dark-theme .nav-item {
+  color: #8e8e93;
+}
+
+body.dark-theme .nav-item.active {
+  color: #0073cc !important;
+}

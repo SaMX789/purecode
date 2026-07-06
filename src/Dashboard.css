@@ -387,3 +387,88 @@
 .nav-item.active span {
   color: #0f172a;
 }
+/* Botón intercambiador de Tema */
+.btn-theme-toggle {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;  /* Forzamos dimensiones en el contenedor */
+  height: 40px;
+  transition: transform 0.2s ease;
+}
+
+.btn-theme-toggle:hover {
+  transform: scale(1.1);
+}
+
+/* Botón intercambiador de Tema */
+.btn-theme-toggle {
+  background: none;
+  border: none;
+  color: #333333;
+  cursor: pointer;
+  padding: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: color 0.3s ease, transform 0.2s ease;
+}
+
+.btn-theme-toggle svg {
+  display: block;
+}
+
+/* ==========================================
+   🌙 ESTILOS DE MODO OSCURO PARA EL DASHBOARD
+   ========================================== */
+body.dark-theme .dashboard-layout {
+  background-color: #121212;
+}
+
+body.dark-theme .dashboard-header,
+body.dark-theme .bottom-nav {
+  background-color: #1c1c1e !important;
+  border-color: #2c2c2e !important;
+}
+
+body.dark-theme .dashboard-header h2,
+body.dark-theme .btn-theme-toggle,
+body.dark-theme .overview-header h1 {
+  color: #ffffff !important;
+}
+
+body.dark-theme .status-indicator p {
+  color: #aeaeb2;
+}
+
+body.dark-theme .data-card {
+  background-color: #1c1c1e !important;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.4) !important;
+}
+
+body.dark-theme .card-title span,
+body.dark-theme .main-metric .value {
+  color: #ffffff !important;
+}
+
+body.dark-theme .sub-metric .label,
+body.dark-theme .card-footer span {
+  color: #8e8e93;
+}
+
+body.dark-theme .main-metric .unit,
+body.dark-theme .sub-metric .range {
+  color: #d1d1d6;
+}
+
+body.dark-theme .nav-item {
+  color: #8e8e93;
+}
+
+body.dark-theme .nav-item.active {
+  color: #0073cc !important;
+}
