@@ -203,40 +203,6 @@
   text-decoration: underline;
 }
 
-/* =========================================
-   FOOTER DE LA PÁGINA
-========================================= */
-.registro-footer {
-  width: 100%;
-  border-top: 1px solid #e2e8f0;
-  padding: 24px 20px;
-  text-align: center;
-  background-color: #f7f9fc;
-}
-
-.registro-footer p {
-  font-size: 14px;
-  color: #4a5568;
-  margin: 0 0 12px 0;
-}
-
-.registro-footer-links {
-  display: flex;
-  justify-content: center;
-  gap: 20px;
-}
-
-.registro-footer-links a {
-  font-size: 14px;
-  color: #4a5568;
-  font-weight: 600;
-  text-decoration: none;
-}
-
-.registro-footer-links a:hover {
-  color: #1a202c;
-}
-
 
 /* =========================================
    VALIDADOR DE CONTRASEÑA EN TIEMPO REAL

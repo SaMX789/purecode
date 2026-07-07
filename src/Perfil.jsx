@@ -25,6 +25,19 @@ function Perfil() {
   const [confirmarPassword, setConfirmarPassword] = useState('');
   const [identidadVerificada, setIdentidadVerificada] = useState(false);
 
+  // NUEVO: Estados para la visualización de las contraseñas
+  const [mostrarPasswordActual, setMostrarPasswordActual] = useState(false);
+  const [mostrarNuevaPassword, setMostrarNuevaPassword] = useState(false);
+  const [mostrarConfirmarPassword, setMostrarConfirmarPassword] = useState(false);
+
+  // NUEVO: Validaciones en tiempo real para la Nueva Contraseña
+  const tieneLongitud = nuevaPassword.length >= 6;
+  const tieneLetra = /[a-zA-Z]/.test(nuevaPassword);
+  const tieneNumero = /\d/.test(nuevaPassword);
+  const tieneSimbolo = /[!@#$%^&*(),.?":{}|<>]/.test(nuevaPassword);
+
+  const nivelSeguridad = [tieneLongitud, tieneLetra, tieneNumero, tieneSimbolo].filter(Boolean).length;
+  const passwordValida = nivelSeguridad === 4;
   // Sincronizar con los datos reales usando el observador y Firestore
   useEffect(() => {
     // Agregamos "async" porque ahora esperaremos la respuesta de la base de datos
@@ -77,7 +90,7 @@ function Perfil() {
 
   const manejarActualizarPassword = async () => {
     if (nuevaPassword !== confirmarPassword) return alert('Las contraseñas nuevas no coinciden.');
-    if (nuevaPassword.length < 6) return alert('La nueva contraseña debe tener al menos 6 caracteres.');
+    if (!passwordValida) return alert('La nueva contraseña no cumple con todos los requisitos de seguridad.'); // Validación actualizada
 
     const resultado = await actualizarContrasenia(nuevaPassword);
     if (resultado.exito) {
@@ -185,13 +198,24 @@ function Perfil() {
             
             <div className="grupo-input-perfil">
               <label>CONTRASEÑA ACTUAL</label>
-              <input 
-                type="password" 
-                placeholder="••••••••" 
-                value={passwordActual}
-                onChange={(e) => setPasswordActual(e.target.value)}
-                disabled={identidadVerificada}
-              />
+              <div className="perfil-contenedor-password">
+                <input 
+                  type={mostrarPasswordActual ? "text" : "password"} 
+                  placeholder="••••••••" 
+                  value={passwordActual}
+                  onChange={(e) => setPasswordActual(e.target.value)}
+                  disabled={identidadVerificada}
+                />
+                <button type="button" className="perfil-boton-ojito" disabled={identidadVerificada} onClick={() => setMostrarPasswordActual(!mostrarPasswordActual)}>
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    {mostrarPasswordActual ? (
+                      <><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path><line x1="1" y1="1" x2="23" y2="23"></line></>
+                    ) : (
+                      <><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></>
+                    )}
+                  </svg>
+                </button>
+              </div>
             </div>
             
             {!identidadVerificada && (
@@ -202,23 +226,81 @@ function Perfil() {
 
             <hr className="linea-separadora" />
 
-            <div className={`grupo-input-perfil ${!identidadVerificada ? 'bloqueado' : ''}`}>
+            <div className={`grupo-input-perfil ${!identidadVerificada ? 'bloqueado' : ''}`} style={{marginBottom: '8px'}}>
               <label>NUEVA CONTRASEÑA</label>
-              <input 
-                type="password" 
-                disabled={!identidadVerificada}
-                value={nuevaPassword}
-                onChange={(e) => setNuevaPassword(e.target.value)}
-              />
+              <div className="perfil-contenedor-password">
+                <input 
+                  type={mostrarNuevaPassword ? "text" : "password"} 
+                  disabled={!identidadVerificada}
+                  value={nuevaPassword}
+                  onChange={(e) => setNuevaPassword(e.target.value)}
+                  placeholder={identidadVerificada ? "••••••••" : ""}
+                />
+                <button type="button" className="perfil-boton-ojito" disabled={!identidadVerificada} onClick={() => setMostrarNuevaPassword(!mostrarNuevaPassword)}>
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    {mostrarNuevaPassword ? (
+                      <><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path><line x1="1" y1="1" x2="23" y2="23"></line></>
+                    ) : (
+                      <><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></>
+                    )}
+                  </svg>
+                </button>
+              </div>
             </div>
-            <div className={`grupo-input-perfil ${!identidadVerificada ? 'bloqueado' : ''}`}>
+
+            {/* VALIDADOR DE SEGURIDAD (Se muestra solo tras verificar identidad) */}
+            {identidadVerificada && (
+              <div className="perfil-validador-password">
+                <div className="indicador-fuerza-texto">
+                  <span className="etiqueta-fija">Nivel de seguridad:</span>
+                  <span className={`etiqueta-dinamica texto-nivel-${nivelSeguridad}`}>
+                    {nivelSeguridad === 0 && "Muy débil"}
+                    {nivelSeguridad === 1 && "Débil"}
+                    {nivelSeguridad === 2 && "Regular"}
+                    {nivelSeguridad === 3 && "Buena"}
+                    {nivelSeguridad === 4 && "Fuerte"}
+                  </span>
+                </div>
+                <div className="barra-seguridad-fondo">
+                  <div className={`barra-seguridad-progreso nivel-${nivelSeguridad}`}></div>
+                </div>
+                <ul className="lista-requisitos">
+                  <li className={tieneLongitud ? 'cumplido' : ''}>
+                    {tieneLongitud ? <CheckIcon /> : <CircleIcon />} Mínimo 6 caracteres
+                  </li>
+                  <li className={tieneLetra ? 'cumplido' : ''}>
+                    {tieneLetra ? <CheckIcon /> : <CircleIcon />} Al menos una letra
+                  </li>
+                  <li className={tieneNumero ? 'cumplido' : ''}>
+                    {tieneNumero ? <CheckIcon /> : <CircleIcon />} Al menos un número
+                  </li>
+                  <li className={tieneSimbolo ? 'cumplido' : ''}>
+                    {tieneSimbolo ? <CheckIcon /> : <CircleIcon />} Al menos un símbolo
+                  </li>
+                </ul>
+              </div>
+            )}
+
+            <div className={`grupo-input-perfil ${!identidadVerificada ? 'bloqueado' : ''}`} style={{marginTop: '16px'}}>
               <label>CONFIRMAR CONTRASEÑA</label>
-              <input 
-                type="password" 
-                disabled={!identidadVerificada}
-                value={confirmarPassword}
-                onChange={(e) => setConfirmarPassword(e.target.value)}
-              />
+              <div className="perfil-contenedor-password">
+                <input 
+                  type={mostrarConfirmarPassword ? "text" : "password"} 
+                  disabled={!identidadVerificada}
+                  value={confirmarPassword}
+                  onChange={(e) => setConfirmarPassword(e.target.value)}
+                  placeholder={identidadVerificada ? "••••••••" : ""}
+                />
+                <button type="button" className="perfil-boton-ojito" disabled={!identidadVerificada} onClick={() => setMostrarConfirmarPassword(!mostrarConfirmarPassword)}>
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    {mostrarConfirmarPassword ? (
+                      <><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path><line x1="1" y1="1" x2="23" y2="23"></line></>
+                    ) : (
+                      <><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></>
+                    )}
+                  </svg>
+                </button>
+              </div>
             </div>
 
             <button 
@@ -270,5 +352,13 @@ function Perfil() {
     </div>
   );
 }
+
+// Componentes SVG de la lista de requisitos
+const CheckIcon = () => (
+  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#10b981" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+);
+const CircleIcon = () => (
+  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"></circle></svg>
+);
 
 export default Perfil;

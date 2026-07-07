@@ -213,15 +213,6 @@ function Registro() {
 
         </main>
       </div>
-
-      {/* Footer de la página */}
-      <footer className="registro-footer">
-        <p>© 2026 PureCode Environmental. Todos los derechos reservados.</p>
-        <div className="registro-footer-links">
-          <a href="#">Privacidad</a>
-          <a href="#">Documentación Técnica</a>
-        </div>
-      </footer>
     </div>
   );
 }
