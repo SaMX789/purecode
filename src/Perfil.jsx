@@ -9,7 +9,7 @@ import {
   actualizarContrasenia, 
   eliminarCuenta, 
   cerrarSesionUsuario,
-  obtenerDatosUsuario // Asegúrate de haber agregado esta función en tu Registrar.js como te mostré antes
+  obtenerDatosUsuario 
 } from './Registrar.js';
 
 function Perfil() {
@@ -24,28 +24,26 @@ function Perfil() {
   const [nuevaPassword, setNuevaPassword] = useState('');
   const [confirmarPassword, setConfirmarPassword] = useState('');
   const [identidadVerificada, setIdentidadVerificada] = useState(false);
+  
+  // NUEVO ESTADO: Controla la interfaz durante el proceso de eliminación
+  const [eliminando, setEliminando] = useState(false);
 
   // Sincronizar con los datos reales usando el observador y Firestore
   useEffect(() => {
-    // Agregamos "async" porque ahora esperaremos la respuesta de la base de datos
     const cancelarObservador = onAuthStateChanged(auth, async (usuarioActual) => {
       if (usuarioActual) {
         setEmailReal(usuarioActual.email);
         
-        // Vamos a Firestore a buscar el nombre real usando el ID del usuario
         const resultado = await obtenerDatosUsuario(usuarioActual.uid);
         
         if (resultado.exito && resultado.datos && resultado.datos.nombre) {
-          // Si lo encuentra en la base de datos (Ej: Juan Antonio Bautista Lopez), usa ese nombre
           setNombre(resultado.datos.nombre);
         } else {
-          // Si por alguna razón falla, usa el de Auth como respaldo
           setNombre(usuarioActual.displayName || '');
         }
       }
     });
 
-    // Limpieza de memoria al salir de la pantalla
     return () => cancelarObservador();
   }, []);
 
@@ -92,15 +90,22 @@ function Perfil() {
   };
 
   const manejarEliminarCuenta = async () => {
-    const confirmar = window.confirm("¿Estás completamente seguro? Esta acción eliminará tu cuenta de forma permanente.");
+    // Texto de advertencia actualizado
+    const confirmar = window.confirm("¿Estás completamente seguro? Esta acción eliminará tu cuenta y todo tu historial de mediciones de forma permanente.");
     
     if (confirmar) {
+      setEliminando(true); // Bloquea el botón y cambia el texto
+
       const resultado = await eliminarCuenta();
+      
       if (resultado.exito) {
-        alert('Cuenta eliminada. Lamentamos verte partir.');
+        alert('Cuenta y registros eliminados. Lamentamos verte partir.');
+        // No es necesario setEliminando(false) aquí porque redirigimos y el componente se desmonta
         navigate('/');
       } else {
+        console.error("Fallo al eliminar:", resultado.error);
         alert('Por seguridad, necesitas cerrar sesión, volver a entrar e intentarlo de nuevo para eliminar tu cuenta.');
+        setEliminando(false); // Restaura el botón si hubo un error
       }
     }
   };
@@ -239,8 +244,15 @@ function Perfil() {
               <h3>Zona de Riesgo</h3>
               <p>Eliminar permanentemente todos los registros y la cuenta.</p>
             </div>
-            <button type="button" className="btn-eliminar-cuenta" onClick={manejarEliminarCuenta}>
-              Eliminar Cuenta
+            {/* NUEVO: Botón dinámico dependiente del estado 'eliminando' */}
+            <button 
+              type="button" 
+              className="btn-eliminar-cuenta" 
+              onClick={manejarEliminarCuenta}
+              disabled={eliminando} 
+              style={{ opacity: eliminando ? 0.7 : 1, cursor: eliminando ? 'not-allowed' : 'pointer' }}
+            >
+              {eliminando ? 'Eliminando datos...' : 'Eliminar Cuenta'}
             </button>
           </div>
         </section>

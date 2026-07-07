@@ -1,12 +1,11 @@
 import { db, auth } from "./FireBase.js"; // Asegúrate de que la ruta interna de inicialización sea correcta
-import { doc, setDoc, getDoc, updateDoc } from "firebase/firestore";
+import { doc, setDoc, getDoc, updateDoc, collection, getDocs, writeBatch, deleteDoc } from "firebase/firestore";
 // CAMBIO: Se agregaron las herramientas para el perfil
 import { 
   createUserWithEmailAndPassword, signInWithEmailAndPassword, sendEmailVerification, 
   signOut, sendPasswordResetEmail, updateProfile, reauthenticateWithCredential, 
   EmailAuthProvider, updatePassword, deleteUser 
 } from "firebase/auth";
-
 export { auth };
 
 export async function registrarUsuario(nombre, email, contrasenia) {
@@ -128,11 +127,33 @@ export async function actualizarContrasenia(nuevaPassword) {
 
 export async function eliminarCuenta() {
   try {
-    await deleteUser(auth.currentUser);
+    const user = auth.currentUser;
+
+    if (!user) {
+      return { exito: false, error: "No hay un usuario activo para eliminar." };
+    }
+
+    const uid = user.uid;
+    const batch = writeBatch(db);
+    const medicionesRef = collection(db, "RegistrarUsuarios", uid, "mediciones");
+    const snapshotMediciones = await getDocs(medicionesRef);
+
+    // 2. Agregar cada medición al lote de eliminación (Batch)
+    snapshotMediciones.forEach((documento) => {
+      batch.delete(documento.ref);
+    });
+    await batch.commit();
+
+    // 3. Eliminar el documento padre en "RegistrarUsuarios"
+    const userDocRef = doc(db, "RegistrarUsuarios", uid);
+    await deleteDoc(userDocRef);
+    
+    await deleteUser(user);
+    
     return { exito: true };
   } catch (error) {
-    console.error("Error al eliminar cuenta:", error);
-    return { exito: false, error: error.code };
+    console.error("Error al eliminar la cuenta y sus mediciones:", error);
+    return { exito: false, error: error.code || error.message };
   }
 }
 
