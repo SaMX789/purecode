@@ -7,7 +7,7 @@ function Dashboard() {
   const navigate = useNavigate();
 
   // =========================================================
-  // ESTADOS EN VIVO: Inician con los valores de tus compañeros
+  // ESTADOS EN VIVO: Inician con los valores por defecto
   // =========================================================
   const [ph, setPh] = useState(7.5);
   const [tds, setTds] = useState(3);
@@ -71,7 +71,12 @@ function Dashboard() {
     return () => clearInterval(intervalo); 
   }, []);
 
-  const phSaludable = ph >= 5.5 && ph <= 7.3 && tds < 1000;
+  // =========================================================
+  // LÓGICA DE DIAGNÓSTICO AJUSTADA (Para tolerar agua local de 6.46)
+  // =========================================================
+  const phValido = ph >= 6.0 && ph <= 8.5; // Ajustado de 6.5 a 6.0
+  const tdsValido = tds <= 1000;
+  const phSaludable = phValido && tdsValido;
 
   const generarCurvaSVG = (datos, minVal, maxVal) => {
     const rango = maxVal - minVal;
@@ -106,48 +111,47 @@ function Dashboard() {
     <div className="dashboard-layout">
       
       {/* Barra superior */}
-      {/* Barra superior */}
-<header className="dashboard-header">
-  <div className="dashboard-logo-group">
-    <svg viewBox="0 0 24 24" fill="none" stroke="#0073cc" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="logo-icon">
-      <path d="M12 22a7 7 0 0 0 7-7c0-2-1-3.9-3-5.5s-3.5-4-4-6.5c-.5 2.5-2 4.9-4 6.5C6 11.1 5 13 5 15a7 7 0 0 0 7 7z"></path>
-    </svg>
-    <h2>PureCode</h2>
-  </div>
-  
-  <div className="dashboard-user-actions">
-    {/* 🌓 INTERRUPTOR DE MODO OSCURO CON SVG CORREGIDOS */}
-    <button 
-      className="btn-theme-toggle" 
-      onClick={switchModoOscuro}
-      title={modoOscuro ? "Cambiar a Modo Claro" : "Cambiar a Modo Oscuro"}
-    >
-      {modoOscuro ? (
-        /* Icono de Sol - Forzado a color blanco en modo oscuro */
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#ffffff" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-          <circle cx="12" cy="12" r="5"></circle>
-          <line x1="12" y1="1" x2="12" y2="3"></line>
-          <line x1="12" y1="21" x2="12" y2="23"></line>
-          <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
-          <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
-          <line x1="1" y1="12" x2="3" y2="12"></line>
-          <line x1="21" y1="12" x2="23" y2="12"></line>
-          <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
-          <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
-        </svg>
-      ) : (
-        /* Icono de Luna - Forzado al azul de tu paleta en modo claro */
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#0073cc" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-          <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
-        </svg>
-      )}
-    </button>
+      <header className="dashboard-header">
+        <div className="dashboard-logo-group">
+          <svg viewBox="0 0 24 24" fill="none" stroke="#0073cc" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="logo-icon">
+            <path d="M12 22a7 7 0 0 0 7-7c0-2-1-3.9-3-5.5s-3.5-4-4-6.5c-.5 2.5-2 4.9-4 6.5C6 11.1 5 13 5 15a7 7 0 0 0 7 7z"></path>
+          </svg>
+          <h2>PureCode</h2>
+        </div>
+        
+        <div className="dashboard-user-actions">
+          {/* 🌓 INTERRUPTOR DE MODO OSCURO */}
+          <button 
+            className="btn-theme-toggle" 
+            onClick={switchModoOscuro}
+            title={modoOscuro ? "Cambiar a Modo Claro" : "Cambiar a Modo Oscuro"}
+          >
+            {modoOscuro ? (
+              /* Icono de Sol */
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#ffffff" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                <circle cx="12" cy="12" r="5"></circle>
+                <line x1="12" y1="1" x2="12" y2="3"></line>
+                <line x1="12" y1="21" x2="12" y2="23"></line>
+                <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                <line x1="1" y1="12" x2="3" y2="12"></line>
+                <line x1="21" y1="12" x2="23" y2="12"></line>
+                <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+              </svg>
+            ) : (
+              /* Icono de Luna */
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#0073cc" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+              </svg>
+            )}
+          </button>
 
-    <div className="user-avatar" onClick={() => navigate('/perfil')} style={{ cursor: 'pointer' }}>
-      M
-    </div>
-  </div>
-</header>
+          <div className="user-avatar" onClick={() => navigate('/perfil')} style={{ cursor: 'pointer' }}>
+            M
+          </div>
+        </div>
+      </header>
 
       {/* Contenido principal */}
       <main className="dashboard-content">
@@ -172,8 +176,8 @@ function Dashboard() {
                 </svg>
                 <span>NIVEL DE ACIDEZ (pH)</span>
               </div>
-              <span className={`badge ${ph >= 5.5 && ph <= 7.3 ? 'badge-green' : 'badge-red'}`}>
-                {ph >= 5.5 && ph <= 7.3 ? 'SALUDABLE' : 'ALERTA'}
+              <span className={`badge ${phValido ? 'badge-green' : 'badge-red'}`}>
+                {phValido ? 'SALUDABLE' : 'ALERTA'}
               </span>
             </div>
             
@@ -183,15 +187,15 @@ function Dashboard() {
                 <span className="unit">pH</span>
               </div>
               <div className="sub-metric">
-                <span className="label">RANGO DIARIO</span>
-                <span className="range">6.8 — 7.5</span>
+                <span className="label">RANGO NORMAL</span>
+                <span className="range">6.0 — 8.5</span>
               </div>
             </div>
 
             <div className="chart-placeholder">
               <svg viewBox="0 0 400 80" className="wave-graphic" preserveAspectRatio="none">
                 <path 
-                  d={generarCurvaSVG(historialPh, 6.0, 8.0)} 
+                  d={generarCurvaSVG(historialPh, 4.0, 10.0)} 
                   fill="url(#grad1)"
                   style={{ transition: 'd 1s ease-in-out' }} 
                 ></path>
@@ -206,21 +210,21 @@ function Dashboard() {
 
             <div className="card-footer">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
-              <span>Dato modular procesado externamente en datosph.js</span>
+              <span>PureCode</span>
             </div>
           </article>
 
-          {/* Tarjeta de Turbidez */}
+          {/* Tarjeta de TDS */}
           <article className="data-card">
             <div className="card-header">
               <div className="card-title">
                 <svg viewBox="0 0 24 24" fill="none" stroke="#0073cc" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                   <path d="M12 22a7 7 0 0 0 7-7c0-2-1-3.9-3-5.5s-3.5-4-4-6.5c-.5 2.5-2 4.9-4 6.5C6 11.1 5 13 5 15a7 7 0 0 0 7 7z"></path>
                 </svg>
-                <span>TURBIDEZ (NTU / TDS)</span>
+                <span>TOTAL DE SOLIDOS DISUELTOS (TDS)</span>
               </div>
-              <span className={`badge ${tds < 1000 ? 'badge-green' : 'badge-red'}`}>
-                {tds < 1000 ? 'ÓPTIMO' : 'ALTO RIESGO'}
+              <span className={`badge ${tdsValido ? 'badge-green' : 'badge-red'}`}>
+                {tdsValido ? 'ÓPTIMO' : 'ALTO RIESGO'}
               </span>
             </div>
             
@@ -272,7 +276,9 @@ function Dashboard() {
             </div>
             <div className="index-body">
               <div className="progress-circle" style={{ borderColor: phSaludable ? '#0073cc' : '#D3435C' }}>
-                <span className="percentage">{phSaludable ? '98%' : 'Alerta'}</span>
+                <span className="percentage" style={{ color: phSaludable ? '#0073cc' : '#D3435C' }}>
+                  {phSaludable ? '100%' : 'Riesgo'}
+                </span>
               </div>
               <div className="index-info">
                 <p>
