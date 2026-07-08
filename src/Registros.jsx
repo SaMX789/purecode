@@ -276,7 +276,7 @@ function Registros() {
             </div>
           </div>
           <div className="tarjeta-resumen">
-            <span className="resumen-label">Turbidez</span>
+            <span className="resumen-label">TDS</span>
             <div className="resumen-valor">
               <span className="numero cafe">0</span>
               <span className="estado">PPM</span>
@@ -397,8 +397,8 @@ function Registros() {
                   <span className="modal-dato-valor valor-ph">{phReal} pH</span>
                 </div>
                 <div className="modal-fila-dato">
-                  <span className="modal-dato-label">Turbidez Máx:</span>
-                  <span className="modal-dato-valor valor-turbidez">{tdsReal} NTU</span>
+                  <span className="modal-dato-label">TDS:</span>
+                  <span className="modal-dato-valor valor-turbidez">{tdsReal} ppm</span>
                 </div>
               </div>
 
