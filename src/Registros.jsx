@@ -19,7 +19,7 @@ function Registros() {
   // Estados para controlar el flujo de la nueva medición
   const [pasoFlujo, setPasoFlujo] = useState('IDLE'); // 'IDLE', 'INPUT_NAME', 'COUNTDOWN', 'SHOW_RESULTS'
   const [nombreRegistro, setNombreRegistro] = useState('');
-  const [contador, setContador] = useState(15);
+  const [contador, setContador] = useState(10);
   const [usuarioId, setUsuarioId] = useState(null);
 
   // 💾 LOCALSTORAGE: Estado inicial de las notificaciones leyendo el disco local
@@ -103,7 +103,7 @@ function Registros() {
     obtenerMediciones();
   }, [usuarioId, pasoFlujo]); 
 
-  // Manejo del temporizador de 15 segundos
+  // Manejo del temporizador de 10 segundos
   useEffect(() => {
     let temporizador;
     if (pasoFlujo === 'COUNTDOWN' && contador > 0) {
@@ -129,7 +129,7 @@ function Registros() {
   // Funciones de control del flujo
   const iniciarFlujo = () => {
     setNombreRegistro('');
-    setContador(15); 
+    setContador(10); 
     setPasoFlujo('INPUT_NAME');
   };
 
@@ -268,21 +268,7 @@ function Registros() {
         </section>
 
         {/* Tarjetas de Resumen Promedio */}
-        <section className="registros-resumen-grid">
-          <div className="tarjeta-resumen">
-            <span className="resumen-label">pH</span>
-            <div className="resumen-valor">
-              <span className="numero azul">0</span>
-            </div>
-          </div>
-          <div className="tarjeta-resumen">
-            <span className="resumen-label">TDS</span>
-            <div className="resumen-valor">
-              <span className="numero cafe">0</span>
-              <span className="estado">PPM</span>
-            </div>
-          </div>
-        </section>
+        
 
         {/* Botón Disparador */}
         <section className="registros-acciones">
@@ -304,7 +290,7 @@ function Registros() {
                 <tr>
                   <th>Nombre/Ubicación</th>
                   <th>pH</th>
-                  <th>Turbidez</th>
+                  <th>TDS</th>
                   <th>Fecha</th>
                 </tr>
               </thead>
@@ -313,7 +299,7 @@ function Registros() {
                   <tr key={index}>
                     <td className="celda-nombre">{registro.nombre}</td>
                     <td className="celda-ph">{registro.ph}</td>
-                    <td className="celda-turbidez">{registro.turbidez} NTU</td>
+                    <td className="celda-tds">{registro.tds} PPM</td>
                     <td className="celda-fecha">{registro.fecha}</td>
                   </tr>
                 ))}
